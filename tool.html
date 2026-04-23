@@ -121,6 +121,27 @@
     padding: 10px 12px; background: #fff; border: 1px solid #EDE9E0;
     border-radius: 6px; margin-top: 6px;
   }
+  .nbp-palette-choices {
+    display: flex; gap: 6px; margin-top: 8px;
+  }
+  .nbp-palette-mode {
+    flex: 1;
+    padding: 7px 10px;
+    font-size: 10px;
+    font-family: 'Josefin Sans', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: 1px solid #D8D4CC;
+    background: #fff;
+    color: #888;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .nbp-palette-mode:hover { border-color: #B59448; color: #B59448; }
+  .nbp-palette-mode.active { background: #B59448; color: #fff; border-color: #B59448; }
+  .nbp-custom-colors { padding-top: 4px; }
   .nbp-swatches { display: flex; gap: 5px; }
   .nbp-swatch { width: 22px; height: 22px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.1); }
   .nbp-palette-info { font-size: 12px; flex: 1; }
@@ -267,7 +288,32 @@
               <span id="palette-label">NBP brand colors</span>
               <span class="src" id="palette-src">Default fallback</span>
             </div>
-            <button class="nbp-palette-toggle" id="btn-toggle-palette">Use NBP colors</button>
+          </div>
+          <div class="nbp-palette-choices">
+            <button class="nbp-palette-mode" id="mode-nbp" data-mode="nbp">NBP colors</button>
+            <button class="nbp-palette-mode" id="mode-ai" data-mode="ai" style="display:none">AI-found colors</button>
+            <button class="nbp-palette-mode" id="mode-custom" data-mode="custom">Custom colors</button>
+          </div>
+          <div class="nbp-custom-colors" id="custom-colors" style="display:none">
+            <div class="nbp-row2" style="margin-top:8px">
+              <div class="nbp-field" style="margin-bottom:0">
+                <label style="font-size:10px">Primary (darker)</label>
+                <div style="display:flex;gap:6px;align-items:center">
+                  <input type="color" id="f-customPrimary" value="#0A2540" style="width:38px;height:34px;padding:0;border:1px solid #D8D4CC;border-radius:5px;background:#fff;cursor:pointer">
+                  <input type="text" id="f-customPrimaryHex" class="nbp-input" value="#0A2540" style="flex:1;font-family:monospace;font-size:12px" placeholder="#1E3A8A">
+                </div>
+              </div>
+              <div class="nbp-field" style="margin-bottom:0">
+                <label style="font-size:10px">Accent (brighter)</label>
+                <div style="display:flex;gap:6px;align-items:center">
+                  <input type="color" id="f-customAccent" value="#D4A54C" style="width:38px;height:34px;padding:0;border:1px solid #D8D4CC;border-radius:5px;background:#fff;cursor:pointer">
+                  <input type="text" id="f-customAccentHex" class="nbp-input" value="#D4A54C" style="flex:1;font-family:monospace;font-size:12px" placeholder="#D4A54C">
+                </div>
+              </div>
+            </div>
+            <div class="nbp-tip" style="margin-top:8px">
+              Check the school's website or athletics page for their official colors.
+            </div>
           </div>
         </div>
       </div>
@@ -368,12 +414,14 @@
   ];
 
   /* ================== STATE ================== */
+  // paletteMode: 'nbp' | 'ai' | 'custom'
   var state = {
-    schoolColorsFound: false,
-    schoolPrimary: NBP_BRAND.p,
-    schoolAccent:  NBP_BRAND.s,
-    schoolColorConfidence: null,
-    usingNbpColors: true,
+    paletteMode: 'nbp',
+    aiPrimary: null,
+    aiAccent: null,
+    aiColorConfidence: null,
+    customPrimary: NBP_BRAND.p,
+    customAccent: NBP_BRAND.s,
     aiResearched: false,
     research: null
   };
@@ -418,14 +466,25 @@
   }
 
   function currentPalette() {
-    if (state.usingNbpColors || !state.schoolColorsFound) return NBP_BRAND;
-    return {
-      p: state.schoolPrimary,
-      pDeep: darken(state.schoolPrimary, 0.3),
-      s: state.schoolAccent,
-      label: "School colors",
-      src: "Found on school website"
-    };
+    if (state.paletteMode === 'ai' && state.aiPrimary && state.aiAccent) {
+      return {
+        p: state.aiPrimary,
+        pDeep: darken(state.aiPrimary, 0.3),
+        s: state.aiAccent,
+        label: "School colors",
+        src: "Found by AI"
+      };
+    }
+    if (state.paletteMode === 'custom') {
+      return {
+        p: state.customPrimary,
+        pDeep: darken(state.customPrimary, 0.3),
+        s: state.customAccent,
+        label: "Custom colors",
+        src: "Set manually"
+      };
+    }
+    return NBP_BRAND;
   }
   function darken(hex, amount) {
     try {
@@ -446,13 +505,15 @@
     $("sw-accent").style.background  = pal.s;
     $("palette-label").textContent = pal.label;
     $("palette-src").textContent   = pal.src;
-    var toggle = $("btn-toggle-palette");
-    if (state.schoolColorsFound) {
-      toggle.style.display = "inline-block";
-      toggle.textContent = state.usingNbpColors ? "Use school colors" : "Use NBP colors";
-    } else {
-      toggle.style.display = "none";
-    }
+
+    // Mode buttons
+    document.querySelectorAll(".nbp-palette-mode").forEach(function(btn) {
+      btn.classList.toggle("active", btn.dataset.mode === state.paletteMode);
+    });
+    // Only show "AI-found colors" option if AI actually found some
+    $("mode-ai").style.display = (state.aiPrimary && state.aiAccent) ? "inline-block" : "none";
+    // Custom picker visible when mode is custom
+    $("custom-colors").style.display = (state.paletteMode === 'custom') ? "block" : "none";
   }
 
   function readForm() {
@@ -550,14 +611,21 @@
     // School colors
     var hasColors = r.primaryColor && r.accentColor && r.colorsConfidence !== "low";
     if (hasColors) {
-      state.schoolColorsFound = true;
-      state.schoolPrimary = r.primaryColor;
-      state.schoolAccent  = r.accentColor;
-      state.schoolColorConfidence = r.colorsConfidence;
-      state.usingNbpColors = false;
+      state.aiPrimary = r.primaryColor;
+      state.aiAccent  = r.accentColor;
+      state.aiColorConfidence = r.colorsConfidence;
+      state.paletteMode = 'ai';
+      // Also pre-fill the custom color pickers with AI values as a starting point
+      state.customPrimary = r.primaryColor;
+      state.customAccent = r.accentColor;
+      $("f-customPrimary").value = r.primaryColor;
+      $("f-customAccent").value = r.accentColor;
+      $("f-customPrimaryHex").value = r.primaryColor;
+      $("f-customAccentHex").value = r.accentColor;
     } else {
-      state.schoolColorsFound = false;
-      state.usingNbpColors = true;
+      state.aiPrimary = null;
+      state.aiAccent = null;
+      state.paletteMode = 'nbp';
     }
     updatePaletteDisplay();
 
@@ -714,12 +782,40 @@
     }
   });
 
-  // Palette toggle
-  $("btn-toggle-palette").addEventListener("click", function() {
-    state.usingNbpColors = !state.usingNbpColors;
-    updatePaletteDisplay();
-    updatePreview();
+  // Palette mode buttons
+  document.querySelectorAll(".nbp-palette-mode").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      state.paletteMode = btn.dataset.mode;
+      updatePaletteDisplay();
+      updatePreview();
+    });
   });
+
+  // Custom color pickers — sync hex input with color picker both ways
+  function syncColorPair(pickerId, hexId, stateField) {
+    var picker = $(pickerId);
+    var hex = $(hexId);
+    picker.addEventListener("input", function() {
+      hex.value = picker.value.toUpperCase();
+      state[stateField] = picker.value;
+      // Auto-switch to custom mode when user changes a color
+      state.paletteMode = 'custom';
+      updatePaletteDisplay();
+      updatePreview();
+    });
+    hex.addEventListener("input", function() {
+      var v = hex.value.trim();
+      if (/^#[0-9A-Fa-f]{6}$/.test(v)) {
+        picker.value = v;
+        state[stateField] = v;
+        state.paletteMode = 'custom';
+        updatePaletteDisplay();
+        updatePreview();
+      }
+    });
+  }
+  syncColorPair("f-customPrimary", "f-customPrimaryHex", "customPrimary");
+  syncColorPair("f-customAccent",  "f-customAccentHex",  "customAccent");
 
   // Tabs
   document.querySelectorAll(".nbp-tab-pill").forEach(function(tab) {
