@@ -1,0 +1,799 @@
+<!-- ============================================================
+     NBP Smart Proposal Builder
+     ------------------------------------------------------------
+     Frontend-only. All secrets live on the Railway backend.
+     Research and publish both go through API_BASE.
+     ============================================================ -->
+
+<style>
+  .nbp-smart, .nbp-smart *, .nbp-smart *::before, .nbp-smart *::after { box-sizing: border-box; }
+  .nbp-smart {
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: #333;
+    background: #F7F6F2;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #E8E4DC;
+    margin: 20px 0;
+    min-height: 900px;
+  }
+  .nbp-smart h1, .nbp-smart h2, .nbp-smart h3 { font-family: 'Josefin Sans', sans-serif; margin: 0; padding: 0; }
+
+  .nbp-sh { background: #fff; border-bottom: 1px solid #E8E4DC; padding: 18px 32px; display: flex; justify-content: space-between; align-items: center; }
+  .nbp-sh-brand { font-family: 'Josefin Sans', sans-serif; font-weight: 700; letter-spacing: 0.14em; font-size: 16px; text-transform: uppercase; color: #1a1a1a; }
+  .nbp-sh-sub { font-size: 9px; font-weight: 500; letter-spacing: 0.3em; color: #bbb; text-transform: uppercase; margin-top: 2px; }
+  .nbp-sh-right { font-family: 'Josefin Sans', sans-serif; font-size: 11px; color: #aaa; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; }
+
+  .nbp-body { display: grid; grid-template-columns: 460px 1fr; min-height: 820px; }
+  .nbp-form { background: #fff; border-right: 1px solid #E8E4DC; padding: 28px 28px 60px; overflow-y: auto; max-height: 900px; }
+  .nbp-preview { background: #EFEDE8; display: flex; flex-direction: column; }
+
+  /* Step cards */
+  .nbp-step {
+    margin-bottom: 18px;
+    padding: 18px 18px 16px;
+    background: #FAFAF7;
+    border: 1px solid #EDE9E0;
+    border-radius: 10px;
+    transition: opacity 0.2s;
+  }
+  .nbp-step.locked { opacity: 0.5; pointer-events: none; }
+  .nbp-step-label {
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #B59448;
+    margin-bottom: 12px;
+  }
+  .nbp-step-label .n {
+    display: inline-block;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: #B59448; color: #fff; text-align: center;
+    font-size: 10px; line-height: 18px; font-weight: 700;
+    margin-right: 8px; letter-spacing: 0;
+  }
+  .nbp-step.done .n { background: #2C7A3E; }
+  .nbp-step.done .n::after { content: "✓"; font-size: 11px; display: block; }
+  .nbp-step.done .n { text-indent: -9999px; position: relative; }
+  .nbp-step.done .n::after { text-indent: 0; position: absolute; left: 0; right: 0; top: 0; }
+
+  .nbp-field { margin-bottom: 11px; }
+  .nbp-field:last-child { margin-bottom: 0; }
+  .nbp-field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: #666;
+    margin-bottom: 4px;
+    letter-spacing: 0.03em;
+  }
+  .nbp-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .nbp-input, .nbp-select, .nbp-textarea {
+    width: 100%; padding: 9px 11px;
+    border: 1px solid #D8D4CC; border-radius: 5px;
+    font-family: 'Poppins', sans-serif; font-size: 13px;
+    color: #333; background: #fff; outline: none;
+  }
+  .nbp-input:focus, .nbp-select:focus, .nbp-textarea:focus {
+    border-color: #B59448; box-shadow: 0 0 0 3px rgba(181, 148, 72, 0.1);
+  }
+  .nbp-textarea { resize: vertical; min-height: 56px; line-height: 1.5; }
+  .nbp-input.ai-filled { background: #FFF9E8; }
+  .nbp-input.ai-filled:focus { background: #fff; }
+
+  .nbp-research-row { display: flex; gap: 10px; align-items: stretch; }
+  .nbp-research-row .nbp-input { flex: 1; }
+
+  .nbp-btn {
+    padding: 10px 16px; border: none; border-radius: 6px;
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+    cursor: pointer; color: #fff;
+    transition: transform 0.15s, opacity 0.15s, background 0.15s;
+    white-space: nowrap;
+  }
+  .nbp-btn:hover:not(:disabled) { transform: translateY(-1px); }
+  .nbp-btn:disabled { background: #DCD8D0 !important; color: #999 !important; cursor: not-allowed; }
+  .nbp-btn-primary { background: #B59448; }
+  .nbp-btn-primary:hover:not(:disabled) { background: #9a7d3c; }
+  .nbp-btn-secondary { background: #0A2540; }
+  .nbp-btn-secondary:hover:not(:disabled) { background: #082030; }
+  .nbp-btn-publish { background: #2C7A3E; }
+  .nbp-btn-publish:hover:not(:disabled) { background: #245f33; }
+  .nbp-btn-email { background: #3A6FB0; }
+  .nbp-btn-email:hover:not(:disabled) { background: #305c95; }
+  .nbp-btn-ghost { background: transparent; color: #666; border: 1px solid #D8D4CC; }
+  .nbp-btn-ghost:hover:not(:disabled) { background: #F2EFEA; color: #333; }
+
+  .nbp-spin {
+    display: inline-block; width: 12px; height: 12px;
+    border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff;
+    border-radius: 50%; animation: nbp-spin 0.8s linear infinite;
+    margin-right: 8px; vertical-align: -2px;
+  }
+  @keyframes nbp-spin { to { transform: rotate(360deg); } }
+
+  .nbp-palette-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; background: #fff; border: 1px solid #EDE9E0;
+    border-radius: 6px; margin-top: 6px;
+  }
+  .nbp-swatches { display: flex; gap: 5px; }
+  .nbp-swatch { width: 22px; height: 22px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.1); }
+  .nbp-palette-info { font-size: 12px; flex: 1; }
+  .nbp-palette-info .src { color: #888; font-size: 11px; display: block; margin-top: 1px; }
+  .nbp-palette-toggle { font-size: 10px; color: #B59448; background: none; border: none; cursor: pointer; text-decoration: underline; letter-spacing: 0.04em; }
+
+  .nbp-check {
+    display: flex; gap: 10px; align-items: flex-start; cursor: pointer;
+    padding: 6px 0; font-size: 13px; color: #555; line-height: 1.5;
+  }
+  .nbp-check input { accent-color: #B59448; margin-top: 3px; flex-shrink: 0; }
+
+  .nbp-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+  .nbp-actions .nbp-btn { padding: 12px 14px; }
+
+  .nbp-status {
+    margin-top: 12px; padding: 10px 12px; border-radius: 6px;
+    font-size: 12px; line-height: 1.5; display: none;
+  }
+  .nbp-status.show { display: block; }
+  .nbp-status.success { background: #E8F5EA; color: #2C7A3E; border: 1px solid #B8DFC2; }
+  .nbp-status.error { background: #FBE8E8; color: #B03030; border: 1px solid #F0B8B8; }
+  .nbp-status.info { background: #E8EFF7; color: #2A5590; border: 1px solid #C0D4EC; }
+  .nbp-status a { color: inherit; font-weight: 600; text-decoration: underline; }
+
+  .nbp-tip {
+    font-size: 12px; color: #888; margin-top: 6px; line-height: 1.5;
+  }
+
+  /* Preview pane */
+  .nbp-preview-bar {
+    padding: 14px 24px; background: #fff; border-bottom: 1px solid #E8E4DC;
+    display: flex; gap: 8px; align-items: center;
+  }
+  .nbp-preview-label {
+    font-family: 'Josefin Sans', sans-serif; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.2em; text-transform: uppercase; color: #888; margin-right: auto;
+  }
+  .nbp-tab-pill {
+    padding: 6px 14px; border-radius: 20px; border: none;
+    font-family: 'Josefin Sans', sans-serif; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    cursor: pointer; background: transparent; color: #888;
+  }
+  .nbp-tab-pill.active { background: #0A2540; color: #fff; }
+
+  .nbp-preview-frame { flex: 1; padding: 20px; }
+  .nbp-preview-frame iframe {
+    width: 100%; height: 100%; min-height: 740px;
+    border: 1px solid #D8D4CC; border-radius: 8px; background: #fff;
+  }
+  .nbp-empty {
+    display: flex; align-items: center; justify-content: center;
+    height: 100%; min-height: 740px;
+    flex-direction: column; gap: 12px; color: #aaa; text-align: center; padding: 2rem;
+  }
+  .nbp-empty-title {
+    font-family: 'Josefin Sans', sans-serif; font-size: 18px;
+    font-weight: 300; letter-spacing: 0.1em;
+  }
+  .nbp-empty-arrow {
+    font-size: 22px; color: #B59448; margin-bottom: 8px;
+  }
+
+  @media (max-width: 900px) {
+    .nbp-body { grid-template-columns: 1fr; }
+    .nbp-form { border-right: none; border-bottom: 1px solid #E8E4DC; max-height: none; }
+    .nbp-preview-frame iframe { min-height: 500px; }
+  }
+</style>
+
+<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<div class="nbp-smart">
+  <div class="nbp-sh">
+    <div>
+      <div class="nbp-sh-brand">Nathan Bingle</div>
+      <div class="nbp-sh-sub">Photography · Internal Tools</div>
+    </div>
+    <div class="nbp-sh-right">Proposal Builder v2</div>
+  </div>
+
+  <div class="nbp-body">
+
+    <div class="nbp-form">
+
+      <div class="nbp-step" id="step-research">
+        <div class="nbp-step-label"><span class="n">1</span>Research the school</div>
+        <div class="nbp-research-row">
+          <input type="text" class="nbp-input" id="f-schoolName" placeholder="Banks Trail Middle School" autocomplete="off">
+          <button class="nbp-btn nbp-btn-primary" id="btn-research">Research ↗</button>
+        </div>
+        <div class="nbp-tip" id="research-tip">Just type the school name. AI fills in everything else.</div>
+      </div>
+
+      <div class="nbp-step locked" id="step-review">
+        <div class="nbp-step-label"><span class="n">2</span>Review what AI found</div>
+
+        <div class="nbp-row2">
+          <div class="nbp-field">
+            <label>Short name</label>
+            <input type="text" class="nbp-input" id="f-schoolShort">
+          </div>
+          <div class="nbp-field">
+            <label>Mascot</label>
+            <input type="text" class="nbp-input" id="f-mascot">
+          </div>
+        </div>
+
+        <div class="nbp-row2">
+          <div class="nbp-field">
+            <label>City, state</label>
+            <input type="text" class="nbp-input" id="f-cityState">
+          </div>
+          <div class="nbp-field">
+            <label>Grade range</label>
+            <input type="text" class="nbp-input" id="f-gradeRange">
+          </div>
+        </div>
+
+        <div class="nbp-field">
+          <label>School type</label>
+          <select class="nbp-select" id="f-schoolType">
+            <option>public elementary school</option>
+            <option>public middle school</option>
+            <option>public high school</option>
+            <option>public K-12 school</option>
+            <option>private school</option>
+            <option>private K-8 school</option>
+            <option>classical public charter school</option>
+            <option>public charter school</option>
+            <option>virtual public school</option>
+          </select>
+        </div>
+
+        <div class="nbp-field">
+          <label>School colors</label>
+          <div class="nbp-palette-row">
+            <div class="nbp-swatches">
+              <div class="nbp-swatch" id="sw-primary" style="background:#0A2540"></div>
+              <div class="nbp-swatch" id="sw-accent" style="background:#D4A54C"></div>
+            </div>
+            <div class="nbp-palette-info">
+              <span id="palette-label">NBP brand colors</span>
+              <span class="src" id="palette-src">Default fallback</span>
+            </div>
+            <button class="nbp-palette-toggle" id="btn-toggle-palette">Use NBP colors</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="nbp-step locked" id="step-extras">
+        <div class="nbp-step-label"><span class="n">3</span>Optional additions</div>
+
+        <label class="nbp-check">
+          <input type="checkbox" id="f-hasSeniors">
+          <span>Has a senior class (adds senior portrait language to contract)</span>
+        </label>
+        <label class="nbp-check">
+          <input type="checkbox" id="f-recLeagueClaim">
+          <span>Show "we photograph your rec league teams" trust signal</span>
+        </label>
+
+        <div class="nbp-field" style="margin-top: 10px;">
+          <label>Custom note for the "About" section (optional)</label>
+          <textarea class="nbp-textarea" id="f-customNote" placeholder="e.g. Great meeting yesterday — your new building is the perfect setting for picture day."></textarea>
+        </div>
+
+        <div class="nbp-field" id="charter-fields" style="display:none; margin-top:12px;">
+          <label style="color:#999">Charter school details (AI detected — edit if needed)</label>
+          <div class="nbp-row2">
+            <input type="text" class="nbp-input" id="f-governedBy" placeholder="Governing body">
+            <input type="text" class="nbp-input" id="f-managedBy" placeholder="Management org">
+          </div>
+        </div>
+      </div>
+
+      <div class="nbp-step locked" id="step-send">
+        <div class="nbp-step-label"><span class="n">4</span>Send it</div>
+        <div class="nbp-actions">
+          <button class="nbp-btn nbp-btn-primary" id="btn-download">⬇ Download proposal</button>
+          <button class="nbp-btn nbp-btn-publish" id="btn-publish">▲ Publish to site</button>
+          <button class="nbp-btn nbp-btn-secondary" id="btn-contract">⬇ Download contract</button>
+          <button class="nbp-btn nbp-btn-email" id="btn-email">✉ Email to school</button>
+        </div>
+        <div class="nbp-status" id="status"></div>
+      </div>
+
+    </div>
+
+    <div class="nbp-preview">
+      <div class="nbp-preview-bar">
+        <span class="nbp-preview-label">Live preview</span>
+        <button class="nbp-tab-pill active" data-mode="proposal">Proposal</button>
+        <button class="nbp-tab-pill" data-mode="contract">Contract</button>
+      </div>
+      <div class="nbp-preview-frame" id="preview-frame">
+        <div class="nbp-empty">
+          <div class="nbp-empty-arrow">←</div>
+          <div class="nbp-empty-title">Start with a school name</div>
+          <div style="font-size:12px">AI will research and fill in the rest.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // Session guard — bounce back to gate if user hasn't authenticated this session
+  try {
+    if (sessionStorage.getItem('nbp_auth') !== '1') {
+      window.location.replace('index.html');
+      return;
+    }
+  } catch(e) { /* continue anyway if storage blocked */ }
+
+  /* ================== CONFIG ================== */
+  var API_BASE     = 'https://nbp-ai-proxy-production.up.railway.app';
+  var TOOL_SECRET  = 'mbUV4wV2Mo5ibJH6iqUQdb3GDy8LStnW';
+  /* ============================================ */
+
+  var PAGES_BASE = 'https://nathangbingle.github.io/nbp-school-proposals';
+
+  var NBP_BRAND = { p: "#0A2540", pDeep: "#002030", s: "#D4A54C", label: "NBP brand colors", src: "Default fallback" };
+
+  var PACKAGES = [
+    { name: "Basic",                   contents: "2× Set of 2 — 3.5×5 prints, 4 Wallet prints",                                         retail: "$25" },
+    { name: "Standard",                contents: "1× 5×7, 2× Set of 2 — 3.5×5 prints, 4 Wallet prints, Group 5×7",                     retail: "$33" },
+    { name: "Mid Tier (Most Popular)", contents: "2× 5×7 prints, 1× 8×10 print, 8 Wallet prints, 3.5×5 Magnet Print",                  retail: "$45" },
+    { name: "3 Digitals",              contents: "3× Photo Downloads (original resolution)",                                           retail: "$50" },
+    { name: "Download All",            contents: "Every photo from the session (original resolution)",                                  retail: "$75" },
+    { name: "Ultimate",                contents: "4× 5×7, 2× 8×10, Memory Mate 8×10, Download All, 3.5×5 Magnet",                      retail: "$81" },
+    { name: "Sibling",                 contents: "4× 5×7, 2× 8×10, 4× Digital Downloads",                                              retail: "$99" }
+  ];
+  var ALACARTE = [
+    { name: "5×7 Print", price: "$15" }, { name: "8×10 Print", price: "$22" },
+    { name: "Set of 2 — 5×7 Prints", price: "$23" }, { name: "Set of 4 — 3.5×5 Prints", price: "$23" },
+    { name: "Set of 8 Wallet Prints", price: "$24" }, { name: "Single Photo Download", price: "$35" },
+    { name: '3" Pinback Button', price: "$12" }, { name: "3.5×5 Magnet Print", price: "$12" },
+    { name: "Set of 2 Magnet Prints", price: "$13" }
+  ];
+
+  /* ================== STATE ================== */
+  var state = {
+    schoolColorsFound: false,
+    schoolPrimary: NBP_BRAND.p,
+    schoolAccent:  NBP_BRAND.s,
+    schoolColorConfidence: null,
+    usingNbpColors: true,
+    aiResearched: false,
+    research: null
+  };
+
+  /* ================== UTIL ================== */
+  function $(id) { return document.getElementById(id); }
+  function esc(s) {
+    if (s == null) return "";
+    return String(s).replace(/[&<>"']/g, function(c) {
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+  function slugName(s) {
+    return (s || "school").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  }
+  function fileName(s) {
+    return (s || "School").replace(/[^a-zA-Z0-9]+/g, "_");
+  }
+  function base64Utf8(str) { return btoa(unescape(encodeURIComponent(str))); }
+
+  function downloadFile(filename, content, mimeType) {
+    var blob = new Blob([content], { type: mimeType });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click();
+    setTimeout(function() { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+  }
+
+  function setStatus(html, type) {
+    var el = $("status");
+    el.className = "nbp-status show " + (type || "info");
+    el.innerHTML = html;
+  }
+  function clearStatus() { $("status").className = "nbp-status"; $("status").innerHTML = ""; }
+
+  function activateStep(id) {
+    $(id).classList.remove("locked");
+  }
+  function markDone(id) {
+    $(id).classList.add("done");
+  }
+
+  function currentPalette() {
+    if (state.usingNbpColors || !state.schoolColorsFound) return NBP_BRAND;
+    return {
+      p: state.schoolPrimary,
+      pDeep: darken(state.schoolPrimary, 0.3),
+      s: state.schoolAccent,
+      label: "School colors",
+      src: "Found on school website"
+    };
+  }
+  function darken(hex, amount) {
+    try {
+      var h = hex.replace("#", "");
+      var r = parseInt(h.substring(0, 2), 16);
+      var g = parseInt(h.substring(2, 4), 16);
+      var b = parseInt(h.substring(4, 6), 16);
+      r = Math.max(0, Math.round(r * (1 - amount)));
+      g = Math.max(0, Math.round(g * (1 - amount)));
+      b = Math.max(0, Math.round(b * (1 - amount)));
+      return "#" + r.toString(16).padStart(2, "0") + g.toString(16).padStart(2, "0") + b.toString(16).padStart(2, "0");
+    } catch(e) { return hex; }
+  }
+
+  function updatePaletteDisplay() {
+    var pal = currentPalette();
+    $("sw-primary").style.background = pal.p;
+    $("sw-accent").style.background  = pal.s;
+    $("palette-label").textContent = pal.label;
+    $("palette-src").textContent   = pal.src;
+    var toggle = $("btn-toggle-palette");
+    if (state.schoolColorsFound) {
+      toggle.style.display = "inline-block";
+      toggle.textContent = state.usingNbpColors ? "Use school colors" : "Use NBP colors";
+    } else {
+      toggle.style.display = "none";
+    }
+  }
+
+  function readForm() {
+    var pal = currentPalette();
+    return {
+      schoolName:      $("f-schoolName").value,
+      schoolShort:     $("f-schoolShort").value,
+      mascot:          $("f-mascot").value,
+      cityState:       $("f-cityState").value,
+      governingState:  (state.research && state.research.governingState) || "North Carolina",
+      schoolType:      $("f-schoolType").value,
+      gradeRange:      $("f-gradeRange").value,
+      termStart:       "August 1, 2026",
+      termEnd:         "June 30, 2027",
+      paletteP:        pal.p,
+      palettePDeep:    pal.pDeep,
+      paletteS:        pal.s,
+      hasSeniors:      $("f-hasSeniors").checked,
+      recLeagueClaim:  $("f-recLeagueClaim").checked,
+      governedBy:      $("f-governedBy") ? $("f-governedBy").value : "",
+      managedBy:       $("f-managedBy") ? $("f-managedBy").value : "",
+      customNote:      $("f-customNote").value,
+      notes:           (state.research && state.research.notes) || ""
+    };
+  }
+
+  /* ================== RESEARCH ================== */
+  async function doResearch() {
+    var schoolName = $("f-schoolName").value.trim();
+    if (!schoolName) {
+      setStatus("Enter a school name first.", "error");
+      return;
+    }
+
+    var btn = $("btn-research");
+    var originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="nbp-spin"></span>Researching…';
+    $("research-tip").textContent = "Looking up the school online — this takes 5–15 seconds.";
+    clearStatus();
+
+    try {
+      var res = await fetch(API_BASE + "/research", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-NBP-Key": TOOL_SECRET },
+        body: JSON.stringify({ schoolName: schoolName })
+      });
+      if (!res.ok) {
+        var err = await res.json().catch(function(){ return { error: "HTTP " + res.status }; });
+        throw new Error(err.error || "Research failed");
+      }
+      var data = await res.json();
+      if (!data.ok || !data.research) throw new Error("No research returned");
+
+      applyResearch(data.research);
+      markDone("step-research");
+      activateStep("step-review");
+      activateStep("step-extras");
+      activateStep("step-send");
+      $("research-tip").textContent = "Done! Review the details and tweak anything AI got wrong.";
+      updatePreview();
+
+    } catch(e) {
+      setStatus("✗ " + e.message, "error");
+      $("research-tip").textContent = "Research failed. You can fill the fields manually instead.";
+      activateStep("step-review");
+      activateStep("step-extras");
+      activateStep("step-send");
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+    }
+  }
+
+  function applyResearch(r) {
+    state.aiResearched = true;
+    state.research = r;
+
+    if (r.schoolName) $("f-schoolName").value = r.schoolName;
+    $("f-schoolShort").value = r.schoolShort || "";
+    $("f-mascot").value      = r.mascot || "";
+    $("f-cityState").value   = r.cityState || "";
+    $("f-gradeRange").value  = r.gradeRange || "";
+    if (r.schoolType) {
+      var opt = Array.from($("f-schoolType").options).find(o => o.value === r.schoolType);
+      if (opt) $("f-schoolType").value = r.schoolType;
+    }
+    $("f-hasSeniors").checked = !!r.hasSeniors;
+
+    // Highlight AI-filled fields in cream so user can see what was populated
+    ["f-schoolShort","f-mascot","f-cityState","f-gradeRange"].forEach(function(id){
+      if ($(id).value) $(id).classList.add("ai-filled");
+    });
+
+    // School colors
+    var hasColors = r.primaryColor && r.accentColor && r.colorsConfidence !== "low";
+    if (hasColors) {
+      state.schoolColorsFound = true;
+      state.schoolPrimary = r.primaryColor;
+      state.schoolAccent  = r.accentColor;
+      state.schoolColorConfidence = r.colorsConfidence;
+      state.usingNbpColors = false;
+    } else {
+      state.schoolColorsFound = false;
+      state.usingNbpColors = true;
+    }
+    updatePaletteDisplay();
+
+    // Charter details
+    if (r.isCharter && (r.governedBy || r.managedBy)) {
+      $("charter-fields").style.display = "block";
+      if ($("f-governedBy")) $("f-governedBy").value = r.governedBy || "";
+      if ($("f-managedBy"))  $("f-managedBy").value  = r.managedBy  || "";
+    } else {
+      $("charter-fields").style.display = "none";
+    }
+  }
+
+  /* ================== PROPOSAL HTML ================== */
+  function buildProposalHtml(f) {
+    var mascot = f.mascot || f.schoolShort || f.schoolName;
+    var intro = f.customNote
+      ? f.customNote
+      : (f.notes
+         ? "Nathan Bingle Photography is a Charlotte-based, high-volume school and youth sports photography company serving the greater Carolinas. " + f.notes.charAt(0).toUpperCase() + f.notes.slice(1) + (f.notes.endsWith(".") ? "" : ".") + " We deliver a streamlined, professional picture-day experience designed to minimize disruption for " + f.schoolShort + " and maximize ordering convenience for families."
+         : "Nathan Bingle Photography is a Charlotte-based, high-volume school and youth sports photography company serving the greater Carolinas. We deliver a streamlined, professional picture-day experience designed to minimize disruption for " + f.schoolShort + " and maximize ordering convenience for families.");
+
+    var trustStrip = f.recLeagueClaim
+      ? '<div class="trust-strip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><span>You already know our work &mdash;</span><strong>we photograph the rec league teams in your community</strong></div>'
+      : "";
+
+    var pkgCards = PACKAGES.map(function(pkg) {
+      var featured = pkg.name.indexOf("Most Popular") > -1;
+      var cleanName = pkg.name.replace(" (Most Popular)", "");
+      var items = pkg.contents.split(", ").map(function(c) { return "<li>" + esc(c) + "</li>"; }).join("");
+      return '<div class="pkg-card ' + (featured ? "featured" : "") + '">' +
+             (featured ? '<div class="pkg-badge">Most Popular</div>' : "") +
+             '<div class="pkg-name">' + esc(cleanName) + '</div>' +
+             '<div class="pkg-price">' + pkg.retail + '</div>' +
+             '<div class="pkg-price-sub">Standard Retail</div>' +
+             '<ul class="pkg-contents">' + items + '</ul></div>';
+    }).join("");
+
+    var seniorBadge = f.hasSeniors
+      ? '<div class="pkg-card"><div class="pkg-name">Senior Portraits</div><div class="pkg-price">$25</div><div class="pkg-price-sub">Booking Deposit</div><ul class="pkg-contents"><li>Cap-and-gown headshot</li><li>Traditional senior headshot</li><li>2–3 additional poses</li><li>One outfit change</li></ul></div>'
+      : "";
+
+    var alcItems = ALACARTE.map(function(a) {
+      return '<div class="alc-item"><span class="alc-name">' + esc(a.name) + '</span><span class="alc-price">' + a.price + '</span></div>';
+    }).join("");
+
+    return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Nathan Bingle Photography — ' + esc(f.schoolName) + ' Partnership Proposal</title><link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet"><style>:root{--p:' + f.paletteP + ';--p-deep:' + f.palettePDeep + ';--s:' + f.paletteS + ';--light:#F2EFEA;--tint:color-mix(in srgb,' + f.paletteP + ' 6%,white);}*{margin:0;padding:0;box-sizing:border-box;}body{font-family:\'Poppins\',sans-serif;background:#F7F6F2;color:#333;}h1,h2,h3{font-family:\'Josefin Sans\',sans-serif;}.site-header{background:#fff;border-bottom:1px solid #E8E4DC;padding:16px 36px;display:flex;justify-content:space-between;align-items:center;}.nbp-mark{font-family:\'Josefin Sans\',sans-serif;font-weight:700;letter-spacing:.14em;font-size:16px;text-transform:uppercase;color:#1a1a1a;}.nbp-sub{font-size:9px;font-weight:500;letter-spacing:.3em;color:#bbb;text-transform:uppercase;margin-top:2px;}.header-right{font-family:\'Josefin Sans\',sans-serif;font-size:11px;color:#ccc;font-weight:700;letter-spacing:.1em;text-transform:uppercase;}.hero{background:var(--p);padding:60px 40px;position:relative;overflow:hidden;}.hero-wm{position:absolute;right:-10px;top:50%;transform:translateY(-50%);font-family:\'Josefin Sans\',sans-serif;font-size:clamp(7rem,18vw,14rem);font-weight:700;letter-spacing:.06em;color:rgba(255,255,255,.05);line-height:1;pointer-events:none;text-transform:uppercase;}.hero-inner{max-width:600px;position:relative;z-index:1;}.hero-kicker{font-family:\'Josefin Sans\',sans-serif;font-size:10px;font-weight:700;letter-spacing:.35em;text-transform:uppercase;color:var(--s);margin-bottom:16px;}.hero-title{font-family:\'Josefin Sans\',sans-serif;font-size:clamp(1.8rem,5vw,3.2rem);font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#fff;line-height:1.1;margin-bottom:10px;}.hero-sub{font-size:14px;color:rgba(255,255,255,.55);margin-bottom:24px;}.hero-pills{display:flex;gap:10px;flex-wrap:wrap;}.hero-pill{font-size:12px;color:#fff;background:rgba(255,255,255,.08);padding:8px 16px;border-radius:6px;border:1px solid rgba(255,255,255,.15);}.hero-bar{position:absolute;bottom:0;left:0;right:0;height:4px;background:var(--s);}.trust-strip{background:var(--p-deep);padding:18px 40px;display:flex;gap:18px;align-items:center;justify-content:center;flex-wrap:wrap;font-family:\'Josefin Sans\',sans-serif;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.8);}.trust-strip svg{color:var(--s);}.trust-strip strong{color:#fff;font-weight:700;}.section{padding:52px 40px;}.section-inner{max-width:760px;margin:0 auto;}.tag{display:inline-block;font-family:\'Josefin Sans\',sans-serif;font-size:9px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:var(--p);background:var(--tint);padding:5px 12px;border-radius:40px;margin-bottom:12px;}.section-h2{font-family:\'Josefin Sans\',sans-serif;font-size:clamp(1.4rem,3vw,1.9rem);font-weight:700;letter-spacing:.04em;color:#1a1a1a;margin-bottom:14px;line-height:1.15;}.section-h2 span{color:var(--p);}.body-text{font-size:13.5px;color:#555;line-height:1.8;margin-bottom:13px;}.three-col{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}.pillar{background:#fff;padding:22px 18px;border-radius:8px;border-top:3px solid var(--s);}.pillar-title{font-family:\'Josefin Sans\',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--p);margin-bottom:8px;}.pillar p{font-size:12.5px;color:#666;line-height:1.65;}.pkg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:26px;}.pkg-card{background:#fff;border-radius:10px;padding:22px 22px 20px;border:1px solid #EDE9E0;position:relative;display:flex;flex-direction:column;}.pkg-card.featured{border-top:3px solid var(--s);box-shadow:0 4px 14px rgba(0,0,0,.06);}.pkg-badge{position:absolute;top:-10px;right:16px;background:var(--s);color:#fff;font-family:\'Josefin Sans\',sans-serif;font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;padding:4px 10px;border-radius:30px;}.pkg-name{font-family:\'Josefin Sans\',sans-serif;font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--p);margin-bottom:14px;}.pkg-price{font-family:\'Josefin Sans\',sans-serif;font-size:42px;font-weight:700;color:#1a1a1a;line-height:1;margin-bottom:4px;}.pkg-price-sub{font-size:10px;color:#aaa;letter-spacing:.12em;text-transform:uppercase;font-family:\'Josefin Sans\',sans-serif;font-weight:600;margin-bottom:16px;}.pkg-contents{list-style:none;padding:0;margin:0;font-size:12.5px;color:#666;flex:1;}.pkg-contents li{padding:6px 0 6px 18px;position:relative;line-height:1.55;border-top:1px solid #F4F1E9;}.pkg-contents li:first-child{border-top:none;}.pkg-contents li::before{content:"";position:absolute;left:0;top:13px;width:6px;height:6px;border-radius:50%;background:var(--s);}.flex-box{background:linear-gradient(135deg,var(--p-deep),var(--p));border-radius:10px;padding:32px 34px;margin-top:38px;color:#fff;position:relative;overflow:hidden;}.flex-title{font-family:\'Josefin Sans\',sans-serif;font-size:9px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--s);margin-bottom:8px;}.flex-h{font-family:\'Josefin Sans\',sans-serif;font-size:22px;font-weight:700;margin-bottom:14px;line-height:1.2;}.flex-body{font-size:13px;line-height:1.75;color:rgba(255,255,255,.8);margin-bottom:20px;max-width:520px;}.flex-track{height:4px;background-image:linear-gradient(to right,rgba(255,255,255,.25) 0%,var(--s) 100%);border-radius:4px;}.flex-ticks{display:flex;justify-content:space-between;margin-top:12px;font-family:\'Josefin Sans\',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;}.flex-tick{display:flex;flex-direction:column;align-items:center;gap:4px;color:rgba(255,255,255,.55);}.flex-tick strong{color:#fff;font-size:13px;}.flex-tick.anchor{color:var(--s);}.flex-example{margin-top:22px;padding-top:22px;border-top:1px solid rgba(255,255,255,.1);font-size:12.5px;color:rgba(255,255,255,.7);line-height:1.75;}.flex-example strong{color:#fff;}.alc-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1px;background:#F0EDE6;border-radius:8px;overflow:hidden;margin-top:14px;}.alc-item{background:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;}.alc-name{font-size:12.5px;color:#444;}.alc-price{font-family:\'Josefin Sans\',sans-serif;font-weight:700;color:var(--p);font-size:14px;white-space:nowrap;margin-left:10px;}.contact-box{background:var(--p-deep);color:#fff;padding:38px 40px;border-radius:10px;text-align:center;margin-top:28px;}.contact-box h3{font-size:22px;font-weight:700;margin-bottom:10px;}.contact-box p{font-size:13px;color:rgba(255,255,255,.65);margin-bottom:6px;}.contact-box strong{color:#fff;font-weight:600;}.footer{padding:30px 0 20px;border-top:1px solid #F0EDE6;text-align:center;color:#999;font-size:11px;}</style></head><body><header class="site-header"><div><div class="nbp-mark">Nathan Bingle</div><div class="nbp-sub">Photography</div></div><div class="header-right">' + esc(f.schoolName) + ' · Partnership Proposal</div></header><div class="hero"><div class="hero-wm">' + esc((mascot || "").toUpperCase()) + '</div><div class="hero-inner"><div class="hero-kicker">School Photography Partnership Proposal</div><h1 class="hero-title">' + esc(f.schoolName) + '</h1><div class="hero-sub">' + esc(mascot) + ' · Grades ' + esc(f.gradeRange) + ' · ' + esc(f.cityState) + '</div><div class="hero-pills"><div class="hero-pill">2026–27 School Year</div><div class="hero-pill">Zero school cost</div><div class="hero-pill">Local photographer</div></div></div><div class="hero-bar"></div></div>' + trustStrip + '<div class="section" style="background:#fff"><div class="section-inner"><div class="tag">About This Proposal</div><h2 class="section-h2">A photography program <span>built for ' + esc(f.schoolShort) + '</span></h2><p class="body-text">' + esc(intro) + '</p></div></div><div class="section" style="background:var(--light)"><div class="section-inner"><div class="tag">Why This Works</div><h2 class="section-h2">Designed for <span>a school like yours</span></h2><div class="three-col"><div class="pillar"><div class="pillar-title">Zero School Cost</div><p>No fees, no upfront spend, no minimums. Parents pay only if they choose to buy. ' + esc(f.schoolShort) + ' never invoices a family or handles a transaction.</p></div><div class="pillar"><div class="pillar-title">Flexible Commission</div><p>Revenue-share rate adjustable from 10–50%, per session. Dial up for fundraising, dial down for family-friendly pricing.</p></div><div class="pillar"><div class="pillar-title">Zero Hassle</div><p>We handle parent notices, online ordering, delivery, direct-to-home shipping, and service. Your staff never lifts a finger on fulfillment.</p></div><div class="pillar"><div class="pillar-title">Background-Checked</div><p>Every team member maintains current background checks before they ever set foot on ' + esc(f.schoolShort) + '\'s campus.</p></div><div class="pillar"><div class="pillar-title">$2M Insured</div><p>$2,000,000 in commercial general liability coverage. Certificate of Insurance provided on request.</p></div><div class="pillar"><div class="pillar-title">FERPA-Aligned</div><p>Student data used only to fulfill the program. Deleted within 30 days of agreement end. No third-party sharing.</p></div></div></div></div><div class="section" style="background:#fff"><div class="section-inner"><div class="tag">Portrait Packages</div><h2 class="section-h2">Pricing that fits <span>' + esc(f.schoolShort) + ' families</span></h2><p class="body-text">Every school family gets the same organized, professional experience &mdash; and a range of ordering options that work for every budget. Prices shown below are our standard retail, structured with a 20% commission share built in.</p><div class="pkg-grid">' + pkgCards + seniorBadge + '</div><h3 style="font-family:\'Josefin Sans\',sans-serif;font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--p);margin-top:44px;margin-bottom:4px">A-la-Carte</h3><p style="font-size:12px;color:#888;margin-bottom:14px">For families who want something specific.</p><div class="alc-list">' + alcItems + '</div></div></div><div class="section" style="background:var(--light)"><div class="section-inner"><div class="tag">Commission Flex</div><h2 class="section-h2">' + esc(f.schoolShort) + ' controls <span>the revenue-share rate</span></h2><p class="body-text" style="max-width:560px">The prices above are our standard retail at a 20% commission share to ' + esc(f.schoolShort) + '. But ' + esc(f.schoolShort) + ' can adjust that rate up or down &mdash; session to session.</p><div class="flex-box"><div class="flex-title">How It Works</div><div class="flex-h">Dial left for the lowest family prices.<br>Dial right for the biggest fundraiser.</div><p class="flex-body">Every dollar a family spends (less sales tax and shipping) is split between ' + esc(f.schoolShort) + ' and NBP according to the commission rate ' + esc(f.schoolShort) + ' selects. Full itemized reporting every time.</p><div class="flex-track"></div><div class="flex-ticks"><div class="flex-tick"><strong>10%</strong><span>Lowest</span></div><div class="flex-tick anchor"><strong>20%</strong><span>Standard</span></div><div class="flex-tick"><strong>30%</strong><span>Moderate</span></div><div class="flex-tick"><strong>40%</strong><span>Strong</span></div><div class="flex-tick"><strong>50%</strong><span>Maximum</span></div></div><div class="flex-example"><strong>Example:</strong> At the standard 20% rate, the Mid Tier package is $45 and ' + esc(f.schoolShort) + ' earns $9 per order. Dial to 30%, and it becomes ~$52 with $16 going to the school. Dial to 40%, and it\'s ~$60 with $24 to the school.</div></div></div></div><div class="section" style="background:#fff"><div class="section-inner"><div class="contact-box"><h3>Take the Next Step</h3><p>Ready to move forward? Reach out and we\'ll send the formal agreement for board and legal review.</p><p style="margin-top:18px"><strong>Nathan Bingle</strong> · Owner</p><p><strong>contact@nathanbinglephotography.com</strong></p><p><strong>704-558-6566</strong> · Call or text</p></div><div class="footer">Nathan Bingle Photography · 422 Crompton St, Charlotte, NC 28273 · Member of Professional Photographers of America</div></div></div></body></html>';
+  }
+
+  /* ================== CONTRACT ================== */
+  function buildContractBody(f) {
+    var hasSeniors = f.hasSeniors;
+    var extraEntity = f.managedBy ? " or " + f.managedBy : "";
+    var governedClause = f.governedBy ? ", governed under " + f.governedBy : "";
+    var managedClause  = f.managedBy ? ", managed by " + f.managedBy : "";
+    var intro = "a " + f.schoolType + (f.gradeRange ? " serving grades " + f.gradeRange : "") + " in " + f.cityState + governedClause + managedClause;
+    var pkgRows = PACKAGES.map(function(p) {
+      return '<tr><td style="border:1px solid #999;padding:6pt 8pt">' + esc(p.name) + '</td><td style="border:1px solid #999;padding:6pt 8pt">' + esc(p.contents) + '</td><td style="border:1px solid #999;padding:6pt 8pt;text-align:center">' + p.retail + '</td></tr>';
+    }).join("");
+    var alcList = ALACARTE.map(function(a) { return "<li>" + esc(a.name) + " — " + a.price + "</li>"; }).join("");
+
+    return '<h1>School Photography Agreement</h1>' +
+      '<p>This Photography Services Agreement ("Agreement") is entered into between <strong>' + esc(f.schoolName) + '</strong> ("School" or "' + esc(f.schoolShort) + '") and <strong>Nathan Bingle Photography</strong> ("Photographer" or "NBP").</p>' +
+      '<h2>1. Overview</h2><p>NBP is a high-volume photography company specializing in streamlined, professional photo experiences for schools. Based in Charlotte, NC.</p>' +
+      '<p>This Agreement outlines the terms under which NBP will serve as the exclusive provider of school portrait photography services for ' + esc(f.schoolName) + ', ' + esc(intro) + '.</p>' +
+      '<h2>2. Term &amp; Renewal</h2><p>This Agreement shall commence on <strong>' + esc(f.termStart) + '</strong> and continue through <strong>' + esc(f.termEnd) + '</strong> (the "Initial Term"). This Agreement shall automatically renew for successive one-year terms unless either party provides written notice of non-renewal at least sixty (60) days prior to the end of the then-current term.</p>' +
+      '<h2>3. Scope of Services</h2><h3>3.1 Picture Day Services</h3><p>NBP agrees to provide professionally trained photographers, organized portrait sessions at ' + esc(f.schoolShort) + '\'s designated location, secure online ordering via GotPhoto, parent-facing customer service, and a dedicated communication contact.</p>' +
+      '<h3>3.2 Picture Day Offerings</h3>' +
+      (hasSeniors
+        ? '<p>Photography services include underclassmen individual portraits, class group photos, senior portraits, and composites. Senior portrait sessions include a non-refundable $25 booking deposit, one cap-and-gown headshot, one traditional senior headshot, 2–3 additional poses, and one outfit change.</p>'
+        : '<p>Photography services include individual portraits, class group photos, and composites for each grade or classroom.</p>') +
+      '<h3>3.3 School-Use Image Delivery</h3><p>Following each session\'s sales window, NBP will provide ' + esc(f.schoolShort) + ' with web-resolution copies of student portraits and class groups for school use.</p>' +
+      '<h2>4. Exclusivity</h2><p>NBP shall be the sole and exclusive professional photographer authorized by ' + esc(f.schoolShort) + ' to photograph school portraits on agreed dates.</p>' +
+      '<h2>5. Pricing &amp; Commission Structure</h2><h3>5.1 Standard Retail Pricing</h3><p>NBP\'s standard retail pricing is set forth in <strong>Exhibit A</strong>, structured with a 20% school commission share built in.</p>' +
+      '<h3>5.2 Flexible Commission Share</h3><p>' + esc(f.schoolShort) + ' may elect a commission rate between 10% and 50%, adjustable per session. Default is 20%. Retail at any elected rate = Standard Retail ÷ (1 − Commission Rate), rounded up.</p>' +
+      '<h3>5.3 Commission Calculation</h3><p>Commission = elected rate × gross sales, less only state sales tax and shipping.</p>' +
+      (hasSeniors ? '<p>The $25 senior booking deposit is an operational fee, not included in commission. All senior portrait orders are commissioned at the elected rate.</p>' : '') +
+      '<h3>5.4 Commission Payment &amp; Reporting</h3><p>Commission is paid within 60 days of each session\'s gallery archive, with an itemized sales report.</p>' +
+      '<h2>6. Parent Experience</h2><p>Parents receive secure online ordering, direct-to-home shipping, multiple packages, and NBP-handled customer service. ' + esc(f.schoolShort) + ' is not responsible for order issues or refunds.</p>' +
+      '<h2>7. School Responsibilities</h2><p>' + esc(f.schoolShort) + ' agrees to provide reasonable photography space, student data, communication assistance using NBP templates, and schedule coordination at least 3 weeks before each session.</p>' +
+      '<h2>8. Image Rights, Privacy &amp; Data Handling</h2><p>NBP retains copyright. Marketing use requires signed parent release on file. Student data is used solely for this Agreement, never sold, and deleted/returned within 30 days of termination.</p>' +
+      '<h2>9. Insurance, Indemnification &amp; Safeguarding</h2><p><strong>Insurance:</strong> $2,000,000 commercial general liability; COI on request. <strong>Indemnification:</strong> Each party indemnifies the other for its own negligence. <strong>Background Checks:</strong> All NBP staff maintain current background checks.</p>' +
+      '<h2>10. Termination</h2><p>Either party may terminate for convenience upon 30 days\' written notice, or immediately for uncured material breach (15-day cure).</p>' +
+      '<h2>11. Liability &amp; Force Majeure</h2><p>NBP is not liable for delays caused by weather, illness, pandemic, or circumstances beyond reasonable control.</p>' +
+      '<h2>12. Independent Contractor</h2><p>NBP operates as an independent contractor. No employer-employee or partnership relationship is created between NBP and ' + esc(f.schoolShort) + extraEntity + '.</p>' +
+      '<h2>13. Governing Law</h2><p>This Agreement shall be governed by the laws of the State of ' + esc(f.governingState) + '.</p>' +
+      '<h2>14. Entire Agreement</h2><p>This Agreement, together with Exhibit A, constitutes the entire understanding.</p>' +
+      '<hr style="margin:24px 0;border:none;border-top:1px solid #999;">' +
+      '<div style="margin-top:30px"><p><strong>' + esc(f.schoolName) + '</strong></p><p style="margin:14px 0">Signature: _______________________________________________</p><p style="margin:14px 0">Name &amp; Title: _______________________________________________</p><p style="margin:14px 0">Date: _______________________________________________</p></div>' +
+      '<div style="margin-top:30px"><p><strong>Nathan Bingle Photography</strong></p><p style="margin:14px 0">Signature: _______________________________________________</p><p style="margin:14px 0">Name &amp; Title: _______________________________________________</p><p style="margin:14px 0">Date: _______________________________________________</p></div>' +
+      '<div style="page-break-before:always"></div><h1>Exhibit A — Standard Retail Pricing</h1>' +
+      '<p>Below is NBP\'s standard retail pricing for ' + esc(f.schoolName) + '. All prices structured with 20% school commission share built in.</p>' +
+      '<h3>Portrait Packages</h3><table style="border-collapse:collapse;width:100%;margin:8pt 0"><thead><tr><th style="border:1px solid #999;padding:6pt 8pt;background:#f2f2f2;text-align:left">Package</th><th style="border:1px solid #999;padding:6pt 8pt;background:#f2f2f2;text-align:left">Contents</th><th style="border:1px solid #999;padding:6pt 8pt;background:#f2f2f2;text-align:center">Retail at 20%</th></tr></thead><tbody>' + pkgRows + '</tbody></table>' +
+      '<h3>A-la-Carte Pricing</h3><ul>' + alcList + '</ul>';
+  }
+
+  function buildContractDoc(f) {
+    return '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>' + esc(f.schoolName) + ' Photography Agreement</title><style>body{font-family:Arial,sans-serif;font-size:11pt;line-height:1.5;color:#000;max-width:6.5in;margin:1in auto;}h1{font-size:20pt;text-align:center;margin-bottom:0.3in;}h2{font-size:14pt;margin-top:20pt;margin-bottom:8pt;}h3{font-size:12pt;margin-top:14pt;margin-bottom:6pt;}p{margin:6pt 0;}ul{margin:4pt 0;padding-left:24pt;}li{margin:3pt 0;}</style></head><body>' + buildContractBody(f) + '</body></html>';
+  }
+
+  /* ================== GITHUB PUBLISH ================== */
+  async function publishProposal(filename, htmlContent) {
+    var res = await fetch(API_BASE + "/publish", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-NBP-Key": TOOL_SECRET },
+      body: JSON.stringify({ filename: filename, html: htmlContent })
+    });
+    if (!res.ok) {
+      var err = await res.json().catch(function(){ return { error: "HTTP " + res.status }; });
+      throw new Error(err.error || "Publish failed");
+    }
+    var data = await res.json();
+    if (!data.ok) throw new Error(data.error || "Publish failed");
+    return { url: data.url, updated: !!data.updated };
+  }
+
+  /* ================== PREVIEW ================== */
+  var previewMode = "proposal";
+
+  function updatePreview() {
+    var f = readForm();
+    var ready = f.schoolName && f.schoolShort;
+    var frame = $("preview-frame");
+
+    if (!ready) {
+      frame.innerHTML = '<div class="nbp-empty"><div class="nbp-empty-arrow">←</div><div class="nbp-empty-title">Start with a school name</div><div style="font-size:12px">AI will research and fill in the rest.</div></div>';
+      return;
+    }
+
+    var src = previewMode === "proposal"
+      ? buildProposalHtml(f)
+      : '<html><body style="font-family:Arial;padding:40px;max-width:720px;margin:0 auto;color:#000;">' + buildContractBody(f) + '</body></html>';
+
+    var iframe = frame.querySelector("iframe");
+    if (!iframe) {
+      frame.innerHTML = '<iframe sandbox="allow-same-origin"></iframe>';
+      iframe = frame.querySelector("iframe");
+    }
+    iframe.srcdoc = src;
+  }
+
+  /* ================== EVENT WIRING ================== */
+  $("btn-research").addEventListener("click", doResearch);
+  $("f-schoolName").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") { e.preventDefault(); doResearch(); }
+  });
+
+  // Wire all review/extras inputs to update preview
+  ["f-schoolShort","f-mascot","f-cityState","f-gradeRange","f-schoolType","f-hasSeniors","f-recLeagueClaim","f-governedBy","f-managedBy","f-customNote"].forEach(function(id) {
+    var el = $(id);
+    if (el) {
+      el.addEventListener("input", function() { el.classList.remove("ai-filled"); updatePreview(); });
+      el.addEventListener("change", updatePreview);
+    }
+  });
+
+  // Palette toggle
+  $("btn-toggle-palette").addEventListener("click", function() {
+    state.usingNbpColors = !state.usingNbpColors;
+    updatePaletteDisplay();
+    updatePreview();
+  });
+
+  // Tabs
+  document.querySelectorAll(".nbp-tab-pill").forEach(function(tab) {
+    tab.addEventListener("click", function() {
+      document.querySelectorAll(".nbp-tab-pill").forEach(function(t){ t.classList.remove("active"); });
+      tab.classList.add("active");
+      previewMode = tab.dataset.mode;
+      updatePreview();
+    });
+  });
+
+  // Download
+  $("btn-download").addEventListener("click", function() {
+    var f = readForm();
+    if (!f.schoolName || !f.schoolShort) { setStatus("Complete the school info first.", "error"); return; }
+    downloadFile(fileName(f.schoolName) + "_Proposal.html", buildProposalHtml(f), "text/html");
+    setStatus("✓ Downloaded " + fileName(f.schoolName) + "_Proposal.html", "success");
+  });
+
+  $("btn-contract").addEventListener("click", function() {
+    var f = readForm();
+    if (!f.schoolName || !f.schoolShort) { setStatus("Complete the school info first.", "error"); return; }
+    downloadFile(fileName(f.schoolName) + "_Agreement.doc", buildContractDoc(f), "application/msword");
+    setStatus("✓ Downloaded " + fileName(f.schoolName) + "_Agreement.doc", "success");
+  });
+
+  // Publish
+  $("btn-publish").addEventListener("click", async function() {
+    var f = readForm();
+    if (!f.schoolName || !f.schoolShort) { setStatus("Complete the school info first.", "error"); return; }
+    var btn = $("btn-publish");
+    var original = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="nbp-spin"></span>Publishing…';
+    setStatus("Publishing to GitHub Pages…", "info");
+
+    try {
+      var filename = slugName(f.schoolName) + ".html";
+      var html = buildProposalHtml(f);
+      var result = await publishProposal(filename, html);
+      var verb = result.updated ? "updated" : "published";
+      setStatus('✓ Proposal ' + verb + '! Live at: <a href="' + result.url + '" target="_blank" rel="noopener">' + result.url + '</a><br><span style="color:#666;font-size:11px">Note: GitHub Pages may take 30–60 seconds to reflect changes.</span>', "success");
+      state.lastPublishedUrl = result.url;
+    } catch(e) {
+      setStatus("✗ Publish failed: " + e.message, "error");
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = original;
+    }
+  });
+
+  // Email: open mailto with prefilled body
+  $("btn-email").addEventListener("click", function() {
+    var f = readForm();
+    if (!f.schoolName || !f.schoolShort) { setStatus("Complete the school info first.", "error"); return; }
+    var url = state.lastPublishedUrl || (PAGES_BASE + "/" + slugName(f.schoolName) + ".html");
+    var subject = f.schoolName + " — partnership proposal from Nathan Bingle Photography";
+    var body =
+      "Hi,\n\n" +
+      "Thanks for considering Nathan Bingle Photography for " + f.schoolShort + "'s picture day program. I put together a proposal specifically for " + f.schoolShort + ":\n\n" +
+      url + "\n\n" +
+      "Everything's on one page — program structure, pricing, and our flexible commission share model that lets " + f.schoolShort + " choose the revenue split. When you're ready to move forward, just click \"Request Agreement\" on the page and I'll send the formal contract.\n\n" +
+      "Happy to jump on a call if anything needs clarifying.\n\n" +
+      "Nathan Bingle\n" +
+      "Nathan Bingle Photography\n" +
+      "contact@nathanbinglephotography.com\n" +
+      "704-558-6566";
+    var mailto = "mailto:?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+    window.location.href = mailto;
+  });
+
+  // Initial render
+  updatePaletteDisplay();
+  updatePreview();
+
+})();
+</script>

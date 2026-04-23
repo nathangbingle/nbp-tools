@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>NBP Internal Tools</title>
+<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Poppins', sans-serif; background: #F7F6F2; min-height: 100vh; color: #333; }
+  .gate { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .gate-card { background: #fff; border: 1px solid #E8E4DC; border-radius: 12px; padding: 48px 44px; max-width: 420px; width: 100%; box-shadow: 0 2px 14px rgba(0,0,0,0.04); }
+  .gate-brand { font-family: 'Josefin Sans', sans-serif; font-weight: 700; letter-spacing: 0.14em; font-size: 18px; text-transform: uppercase; color: #1a1a1a; }
+  .gate-sub { font-size: 9px; font-weight: 500; letter-spacing: 0.3em; color: #bbb; text-transform: uppercase; margin-top: 3px; margin-bottom: 30px; }
+  .gate h1 { font-family: 'Josefin Sans', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: 0.04em; color: #1a1a1a; margin-bottom: 8px; }
+  .gate p { font-size: 13px; color: #666; line-height: 1.6; margin-bottom: 22px; }
+  .gate input { width: 100%; padding: 12px 14px; border: 1px solid #D8D4CC; border-radius: 6px; font-family: 'Poppins', sans-serif; font-size: 14px; color: #333; background: #FAFAF7; outline: none; margin-bottom: 12px; }
+  .gate input:focus { border-color: #B59448; box-shadow: 0 0 0 3px rgba(181, 148, 72, 0.1); background: #fff; }
+  .gate button { width: 100%; padding: 13px 18px; border: none; border-radius: 6px; font-family: 'Josefin Sans', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; cursor: pointer; background: #B59448; color: #fff; transition: background 0.15s; }
+  .gate button:hover { background: #9a7d3c; }
+  .gate-error { font-size: 12px; color: #B03030; margin-top: 10px; display: none; }
+  .gate-error.show { display: block; }
+  .gate-hint { font-size: 11px; color: #aaa; text-align: center; margin-top: 20px; }
+</style>
+</head>
+<body>
+  <div class="gate">
+    <div class="gate-card">
+      <div class="gate-brand">Nathan Bingle</div>
+      <div class="gate-sub">Photography · Internal Tools</div>
+      <h1>Team access</h1>
+      <p>Enter the team password to open the Proposal Builder.</p>
+      <input type="password" id="pw" placeholder="Team password" autofocus autocomplete="current-password" />
+      <button id="go">Enter</button>
+      <div class="gate-error" id="err">Wrong password. Try again.</div>
+      <div class="gate-hint">Ask Nathan if you don't have it.</div>
+    </div>
+  </div>
+
+<script>
+(function() {
+  /*
+   * Password gate — SHA-256 hash of correct password.
+   * This is not real security (a determined attacker can inspect the code),
+   * but it blocks casual access. Combined with the fact that the app URL
+   * is unlisted and the research backend requires a separate secret that
+   * we load after unlock, it's sufficient for a small internal team.
+   */
+  var CORRECT_HASH = 'fe18176f052962c204f1c00ecf659f8e7b1050c3c292009cc90a13347b353836';
+
+  async function sha256(str) {
+    var buf = new TextEncoder().encode(str);
+    var hash = await crypto.subtle.digest('SHA-256', buf);
+    return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  function getStoredAuth() {
+    try { return sessionStorage.getItem('nbp_auth') === '1'; } catch(e) { return false; }
+  }
+  function setStoredAuth() {
+    try { sessionStorage.setItem('nbp_auth', '1'); } catch(e) {}
+  }
+
+  async function tryUnlock(password) {
+    var hash = await sha256(password);
+    return hash === CORRECT_HASH;
+  }
+
+  function unlock() {
+    setStoredAuth();
+    window.location.href = 'tool.html';
+  }
+
+  // If user already unlocked this session, go straight through
+  if (getStoredAuth()) {
+    window.location.replace('tool.html');
+    return;
+  }
+
+  document.getElementById('go').addEventListener('click', async function() {
+    var pw = document.getElementById('pw').value;
+    if (!pw) return;
+    var ok = await tryUnlock(pw);
+    if (ok) {
+      unlock();
+    } else {
+      document.getElementById('err').classList.add('show');
+      document.getElementById('pw').value = '';
+      document.getElementById('pw').focus();
+    }
+  });
+  document.getElementById('pw').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') document.getElementById('go').click();
+  });
+})();
+</script>
+</body>
+</html>
