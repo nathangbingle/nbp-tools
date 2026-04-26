@@ -105,6 +105,23 @@
   .nbp-btn-publish:hover:not(:disabled) { background: #245f33; }
   .nbp-btn-email { background: #3A6FB0; }
   .nbp-btn-email:hover:not(:disabled) { background: #305c95; }
+
+  /* Staff contacts panel */
+  .nbp-contacts { display: flex; flex-direction: column; gap: 6px; }
+  .nbp-contact-row { display: grid; grid-template-columns: 130px 1fr 1.4fr 26px; gap: 6px; align-items: center; }
+  .nbp-contact-row .nbp-input { padding: 7px 9px; font-size: 12px; }
+  .nbp-contact-role { font-size: 11px; font-weight: 600; color: #555; padding: 0 4px; letter-spacing: .04em; }
+  .nbp-contact-use { background: none; border: 1px solid #D8D4CC; color: #888; width: 26px; height: 30px; border-radius: 4px; cursor: pointer; font-size: 14px; padding: 0; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+  .nbp-contact-use:hover:not(:disabled) { border-color: #2C7A3E; color: #2C7A3E; background: #f4faf6; }
+  .nbp-contact-use:disabled { opacity: 0.3; cursor: not-allowed; }
+  .nbp-contact-use.is-default { background: #2C7A3E; color: #fff; border-color: #2C7A3E; }
+  @media (max-width: 540px) {
+    .nbp-contact-row { grid-template-columns: 1fr 26px; gap: 4px; }
+    .nbp-contact-row .nbp-contact-role { grid-column: 1 / -1; margin-top: 4px; }
+    .nbp-contact-row input.nbp-input.contact-name { grid-column: 1 / 2; }
+    .nbp-contact-row input.nbp-input.contact-email { grid-column: 1 / 2; }
+    .nbp-contact-row .nbp-contact-use { grid-column: 2 / 3; grid-row: 2 / 4; height: 100%; }
+  }
   .nbp-btn-ghost { background: transparent; color: #666; border: 1px solid #D8D4CC; }
   .nbp-btn-ghost:hover:not(:disabled) { background: #F2EFEA; color: #333; }
 
@@ -312,8 +329,16 @@
               </div>
             </div>
             <div class="nbp-tip" style="margin-top:8px">
-              Check the school's website or athletics page for their official colors.
+              Pulled from the school's main website header. Edit if AI got it wrong.
             </div>
+          </div>
+        </div>
+
+        <!-- Staff contacts found by AI -->
+        <div class="nbp-field">
+          <label>School contacts <span style="font-weight:400;color:#888">(AI fills in what it can find — empty means no published email)</span></label>
+          <div id="contacts-list" class="nbp-contacts">
+            <!-- contact rows populated by applyResearch -->
           </div>
         </div>
       </div>
@@ -424,7 +449,14 @@
     customPrimary: NBP_BRAND.p,
     customAccent: NBP_BRAND.s,
     aiResearched: false,
-    research: null
+    research: null,
+    contacts: [
+      {role: "Principal",            name: "", email: ""},
+      {role: "Assistant Principal",  name: "", email: ""},
+      {role: "Yearbook Coordinator", name: "", email: ""},
+      {role: "Secretary",            name: "", email: ""}
+    ],
+    selectedContactIdx: 0
   };
 
   /* ================== UTIL ================== */
@@ -640,6 +672,50 @@
     } else {
       $("charter-fields").style.display = "none";
     }
+
+    // Staff contacts
+    var contacts = Array.isArray(r.contacts) && r.contacts.length
+      ? r.contacts
+      : [
+          {role:"Principal", name:"", email:""},
+          {role:"Assistant Principal", name:"", email:""},
+          {role:"Yearbook Coordinator", name:"", email:""},
+          {role:"Secretary", name:"", email:""},
+        ];
+    state.contacts = contacts.map(function(c){ return { role: c.role || "", name: c.name || "", email: c.email || "" }; });
+    // Default selected = first contact with a real email
+    state.selectedContactIdx = state.contacts.findIndex(function(c){ return c.email && c.email.indexOf("@") > 0; });
+    if (state.selectedContactIdx < 0) state.selectedContactIdx = 0;
+    renderContacts();
+  }
+
+  function renderContacts() {
+    var box = $("contacts-list");
+    if (!box) return;
+    box.innerHTML = "";
+    (state.contacts || []).forEach(function(c, idx) {
+      var row = document.createElement("div");
+      row.className = "nbp-contact-row";
+      row.innerHTML =
+        '<div class="nbp-contact-role">' + (c.role || "") + '</div>' +
+        '<input type="text" class="nbp-input contact-name" placeholder="Name" value="' + (c.name || "").replace(/"/g,"&quot;") + '">' +
+        '<input type="email" class="nbp-input contact-email" placeholder="email@school.org" value="' + (c.email || "").replace(/"/g,"&quot;") + '">' +
+        '<button type="button" class="nbp-contact-use' + (idx === state.selectedContactIdx ? " is-default" : "") + '" title="Use as default recipient" data-idx="' + idx + '">' + (idx === state.selectedContactIdx ? "✓" : "○") + '</button>';
+      var nameInput  = row.querySelector(".contact-name");
+      var emailInput = row.querySelector(".contact-email");
+      var useBtn     = row.querySelector(".nbp-contact-use");
+      nameInput.addEventListener("input",  function(){ state.contacts[idx].name  = nameInput.value; });
+      emailInput.addEventListener("input", function(){
+        state.contacts[idx].email = emailInput.value;
+        useBtn.disabled = !(emailInput.value && emailInput.value.indexOf("@") > 0);
+      });
+      useBtn.disabled = !(c.email && c.email.indexOf("@") > 0);
+      useBtn.addEventListener("click", function(){
+        state.selectedContactIdx = idx;
+        renderContacts();
+      });
+      box.appendChild(row);
+    });
   }
 
   /* ================== PROPOSAL HTML ================== */
@@ -1271,15 +1347,20 @@
     var short = f.schoolShort || f.schoolName;
     var mascot = (f.mascot || "").trim();
     var mascotPhrase = mascot ? "the " + mascot : short;
-    var typeLine = (f.schoolType || "").toLowerCase();
     var location = (f.cityState || "").trim();
+
+    // Recipient: use the contact marked as default (first contact with an email by default)
+    var contact = (state.contacts || [])[state.selectedContactIdx] || { name: "", email: "" };
+    var toAddr  = contact.email || "";
+    var firstName = (contact.name || "").trim().split(/\s+/)[0] || "";
+    var greeting = firstName ? "Hi " + firstName + "," : "Hi,";
 
     var subject, body;
 
     if (mode === "warm") {
       subject = short + " proposal — ready for you to review";
       body =
-        "Hi,\n\n" +
+        greeting + "\n\n" +
         "Great connecting with you — thanks for taking the time to walk through what " + short + " is looking for. As promised, here's the partnership proposal I put together for " + mascotPhrase + ":\n\n" +
         url + "\n\n" +
         "Everything we discussed is on one page — program structure, pricing, and the flexible commission share model so " + short + " can choose the revenue split. When you're ready to move forward — or if you'd like to share this with the rest of your team for review — just click \"Request Agreement\" on the page and I'll send the formal contract over for signature.\n\n" +
@@ -1297,7 +1378,7 @@
         : " We work with schools and youth sports programs across the Carolinas, and we already photograph a lot of the rec league teams your families are on — so the work and the people will likely look familiar.";
 
       body =
-        "Hi,\n\n" +
+        greeting + "\n\n" +
         "Nathan Bingle here from Nathan Bingle Photography — a high-volume school and youth sports photography company based in Fort Mill, SC. I wanted to reach out about " + short + "'s picture day program." + localLine + "\n\n" +
         "A few things that might matter for " + mascotPhrase + ": we run revenue-share partnerships (no upfront cost to the school), online ordering so families never deal with order envelopes, a free retake day built in, and a turnaround that keeps your schedule on track.\n\n" +
         "I put together a proposal specifically for " + short + ":\n\n" +
@@ -1310,7 +1391,7 @@
         "704-558-6566";
     }
 
-    var mailto = "mailto:?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+    var mailto = "mailto:" + encodeURIComponent(toAddr) + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
     window.location.href = mailto;
   }
 
@@ -1320,6 +1401,7 @@
   // Initial render
   updatePaletteDisplay();
   updatePreview();
+  renderContacts();
 
 })();
 </script>
