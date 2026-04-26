@@ -350,7 +350,8 @@
           <button class="nbp-btn nbp-btn-primary" id="btn-download">⬇ Download proposal</button>
           <button class="nbp-btn nbp-btn-publish" id="btn-publish">▲ Publish to site</button>
           <button class="nbp-btn nbp-btn-secondary" id="btn-contract">⬇ Download contract</button>
-          <button class="nbp-btn nbp-btn-email" id="btn-email">✉ Email to school</button>
+          <button class="nbp-btn nbp-btn-email" id="btn-email-cold">✉ Cold intro email</button>
+          <button class="nbp-btn nbp-btn-email" id="btn-email-warm">✉ Warm follow-up</button>
         </div>
         <div class="nbp-status" id="status"></div>
       </div>
@@ -1262,25 +1263,59 @@
     }
   });
 
-  // Email: open mailto with prefilled body
-  $("btn-email").addEventListener("click", function() {
+  // Email: open mailto with prefilled body — cold intro or warm follow-up
+  function composeEmail(mode) {
     var f = readForm();
     if (!f.schoolName || !f.schoolShort) { setStatus("Complete the school info first.", "error"); return; }
     var url = state.lastPublishedUrl || (PAGES_BASE + "/" + slugName(f.schoolName) + ".html");
-    var subject = f.schoolName + " — partnership proposal from Nathan Bingle Photography";
-    var body =
-      "Hi,\n\n" +
-      "Thanks for considering Nathan Bingle Photography for " + f.schoolShort + "'s picture day program. I put together a proposal specifically for " + f.schoolShort + ":\n\n" +
-      url + "\n\n" +
-      "Everything's on one page — program structure, pricing, and our flexible commission share model that lets " + f.schoolShort + " choose the revenue split. When you're ready to move forward, just click \"Request Agreement\" on the page and I'll send the formal contract.\n\n" +
-      "Happy to jump on a call if anything needs clarifying.\n\n" +
-      "Nathan Bingle\n" +
-      "Nathan Bingle Photography\n" +
-      "contact@nathanbinglephotography.com\n" +
-      "704-558-6566";
+    var short = f.schoolShort || f.schoolName;
+    var mascot = (f.mascot || "").trim();
+    var mascotPhrase = mascot ? "the " + mascot : short;
+    var typeLine = (f.schoolType || "").toLowerCase();
+    var location = (f.cityState || "").trim();
+
+    var subject, body;
+
+    if (mode === "warm") {
+      subject = short + " proposal — ready for you to review";
+      body =
+        "Hi,\n\n" +
+        "Great connecting with you — thanks for taking the time to walk through what " + short + " is looking for. As promised, here's the partnership proposal I put together for " + mascotPhrase + ":\n\n" +
+        url + "\n\n" +
+        "Everything we discussed is on one page — program structure, pricing, and the flexible commission share model so " + short + " can choose the revenue split. When you're ready to move forward — or if you'd like to share this with the rest of your team for review — just click \"Request Agreement\" on the page and I'll send the formal contract over for signature.\n\n" +
+        "Happy to jump on a call if anything in there needs clarifying.\n\n" +
+        "Talk soon,\n" +
+        "Nathan Bingle\n" +
+        "Nathan Bingle Photography\n" +
+        "contact@nathanbinglephotography.com\n" +
+        "704-558-6566";
+    } else {
+      // cold intro
+      subject = "Picture day partnership for " + (mascot ? "the " + mascot : short);
+      var localLine = location
+        ? " We work with schools and youth sports programs across the Carolinas, and we already photograph a lot of the rec league teams your " + short + " families are on — so the work and the people will likely look familiar."
+        : " We work with schools and youth sports programs across the Carolinas, and we already photograph a lot of the rec league teams your families are on — so the work and the people will likely look familiar.";
+
+      body =
+        "Hi,\n\n" +
+        "Nathan Bingle here from Nathan Bingle Photography — a high-volume school and youth sports photography company based in Fort Mill, SC. I wanted to reach out about " + short + "'s picture day program." + localLine + "\n\n" +
+        "A few things that might matter for " + mascotPhrase + ": we run revenue-share partnerships (no upfront cost to the school), online ordering so families never deal with order envelopes, a free retake day built in, and a turnaround that keeps your schedule on track.\n\n" +
+        "I put together a proposal specifically for " + short + ":\n\n" +
+        url + "\n\n" +
+        "Everything's on one page — program structure, pricing, and our flexible commission share model that lets the school choose the revenue split. Take a look when you have a minute, and reply with any questions or let me know if a short call would be useful.\n\n" +
+        "Talk soon,\n" +
+        "Nathan Bingle\n" +
+        "Nathan Bingle Photography\n" +
+        "contact@nathanbinglephotography.com\n" +
+        "704-558-6566";
+    }
+
     var mailto = "mailto:?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
     window.location.href = mailto;
-  });
+  }
+
+  $("btn-email-cold").addEventListener("click", function() { composeEmail("cold"); });
+  $("btn-email-warm").addEventListener("click", function() { composeEmail("warm"); });
 
   // Initial render
   updatePaletteDisplay();
