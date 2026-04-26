@@ -39,6 +39,17 @@
 
 <script>
 (function() {
+  // ============================================================
+  // PASSWORD GATE BYPASS — set BYPASS = false to re-enable the gate
+  // ============================================================
+  var BYPASS = true;
+  if (BYPASS) {
+    try { sessionStorage.setItem('nbp_auth', '1'); } catch(e) {}
+    window.location.replace('tool.html');
+    return;
+  }
+  // ============================================================
+
   /*
    * Password gate — SHA-256 hash of correct password.
    * This is not real security (a determined attacker can inspect the code),

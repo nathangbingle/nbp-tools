@@ -405,13 +405,21 @@
 (function() {
   'use strict';
 
+  // ============================================================
+  // PASSWORD GATE BYPASS — set BYPASS = false to re-enable the gate
+  // ============================================================
+  var BYPASS = true;
+  // ============================================================
+
   // Session guard — bounce back to gate if user hasn't authenticated this session
-  try {
-    if (sessionStorage.getItem('nbp_auth') !== '1') {
-      window.location.replace('index.html');
-      return;
-    }
-  } catch(e) { /* continue anyway if storage blocked */ }
+  if (!BYPASS) {
+    try {
+      if (sessionStorage.getItem('nbp_auth') !== '1') {
+        window.location.replace('index.html');
+        return;
+      }
+    } catch(e) { /* continue anyway if storage blocked */ }
+  }
 
   /* ================== CONFIG ================== */
   var API_BASE     = 'https://nbp-ai-proxy-production.up.railway.app';
