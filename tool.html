@@ -228,6 +228,69 @@
     .nbp-form { border-right: none; border-bottom: 1px solid #E8E4DC; max-height: none; }
     .nbp-preview-frame iframe { min-height: 500px; }
   }
+
+  @media (max-width: 640px) {
+    /* Shell header */
+    .nbp-sh { padding: 14px 16px; }
+    .nbp-sh-brand { font-size: 14px; }
+    .nbp-sh-sub { font-size: 8px; letter-spacing: 0.25em; }
+    .nbp-sh-right { font-size: 9px; letter-spacing: 0.08em; }
+
+    /* Form sidebar — tighter padding, room for thumb */
+    .nbp-form { padding: 18px 16px 36px; }
+
+    /* Tap targets — bigger inputs and buttons */
+    .nbp-input, .nbp-select, .nbp-textarea {
+      padding: 12px 12px; font-size: 16px; /* 16px prevents iOS zoom-on-focus */
+    }
+    .nbp-btn { padding: 14px 16px; font-size: 12px; min-height: 44px; }
+
+    /* Form rows stack on phone */
+    .nbp-row2 { grid-template-columns: 1fr; gap: 8px; }
+
+    /* Palette buttons wrap */
+    .nbp-palette-choices { flex-wrap: wrap; gap: 6px; }
+    .nbp-palette-mode { flex: 1 1 auto; min-width: 100px; padding: 10px 8px; min-height: 38px; }
+
+    /* Action buttons stack on the smallest screens to keep them readable */
+    .nbp-actions { grid-template-columns: 1fr; gap: 10px; }
+
+    /* Preview tab strip — horizontal scroll if too many tabs */
+    .nbp-preview-bar {
+      padding: 10px 14px; gap: 6px;
+      overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap;
+    }
+    .nbp-preview-bar::-webkit-scrollbar { display: none; }
+    .nbp-preview-label { display: none; } /* save space on phones */
+    .nbp-tab-pill { padding: 9px 14px; font-size: 11px; min-height: 38px; flex-shrink: 0; }
+
+    /* Preview frame fills phone screen */
+    .nbp-preview-frame { padding: 12px; }
+    .nbp-preview-frame iframe { min-height: calc(100vh - 320px); }
+
+    /* Status messages full-width */
+    .nbp-status { font-size: 12.5px; }
+
+    /* Section titles */
+    .nbp-section-title { font-size: 11px; }
+
+    /* Research/AI fill row — buttons + input */
+    .nbp-research-row { flex-direction: column; gap: 8px; }
+    .nbp-research-row .nbp-input { width: 100%; }
+    .nbp-research-row .nbp-btn { width: 100%; }
+
+    /* Contacts list — already has 540px reflow, ensure spacing on mobile */
+    .nbp-contacts { gap: 10px; }
+
+    /* Custom color pickers wrap if cramped */
+    .nbp-custom-colors { flex-wrap: wrap; gap: 10px; }
+    .nbp-palette-row { width: 100%; }
+
+    /* Empty state in preview */
+    .nbp-empty { padding: 30px 20px; }
+    .nbp-empty-arrow { display: none; } /* arrow points to a sidebar that's now stacked above */
+    .nbp-empty-title { font-size: 14px; }
+  }
 </style>
 
 <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
