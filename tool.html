@@ -387,6 +387,8 @@
       <div class="nbp-preview-bar">
         <span class="nbp-preview-label">Live preview</span>
         <button class="nbp-tab-pill active" data-mode="proposal">Proposal</button>
+        <button class="nbp-tab-pill" data-mode="banner">Banner Promo</button>
+        <button class="nbp-tab-pill" data-mode="ad">AD Briefing</button>
         <button class="nbp-tab-pill" data-mode="contract">Contract</button>
       </div>
       <div class="nbp-preview-frame" id="preview-frame">
@@ -844,6 +846,221 @@
       + "@media(max-width:640px){.two-col,.contact-grid{grid-template-columns:1fr;}.three-col{grid-template-columns:1fr 1fr;}.two-col-eq{grid-template-columns:1fr;}.timeline{grid-template-columns:1fr 1fr;}.trust-strip{flex-direction:column;gap:6px;padding:16px 20px;}.hero,.section{padding-left:20px;padding-right:20px;}.site-header{padding-left:16px;padding-right:16px;}}";
   }
 
+
+  /* ============================================================
+   * BANNER PROMO TEMPLATE
+   * Banner-program-led, single-page, lean (booster outreach use case)
+   * ============================================================ */
+  function bannerPromoStyles() {
+    return ":root{--p:#15254A;--p-deep:#0D1830;--s:#E54D1F;--paper:#fff;--paper-warm:#F7F4EF;--ink:#1A2030;--muted:#6B7180;--rule:#E3DED4;}"
+      + "*{box-sizing:border-box;margin:0;padding:0;}"
+      + "html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}"
+      + "body{font-family:'Poppins',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--paper);color:var(--ink);line-height:1.6;font-size:14.5px;}"
+      + ".page{max-width:880px;margin:0 auto;padding:48px 56px;background:#fff;}"
+      + ".masthead{display:flex;justify-content:space-between;align-items:flex-end;padding-bottom:18px;border-bottom:2px solid var(--p);margin-bottom:40px;}"
+      + ".wordmark{font-family:'Josefin Sans',sans-serif;font-weight:700;letter-spacing:.14em;font-size:19px;color:var(--p);text-transform:uppercase;}"
+      + ".meta{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);text-align:right;line-height:1.8;font-weight:500;}"
+      + ".meta strong{color:var(--p);font-weight:700;}"
+      + ".hero{margin-bottom:40px;}"
+      + ".kicker{font-family:'Josefin Sans',sans-serif;font-size:11px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:var(--s);margin-bottom:14px;}"
+      + ".h1{font-family:'Josefin Sans',sans-serif;font-size:32px;font-weight:700;line-height:1.15;color:var(--p);margin-bottom:14px;}"
+      + ".h1 .accent{color:var(--s);}"
+      + ".lede{font-size:15.5px;color:#3a4150;line-height:1.65;max-width:620px;}"
+      + ".section{margin-bottom:36px;}"
+      + ".tag{display:inline-block;font-family:'Josefin Sans',sans-serif;font-size:9px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:var(--p);background:#F2EBE4;padding:5px 12px;border-radius:30px;margin-bottom:12px;}"
+      + ".h2{font-family:'Josefin Sans',sans-serif;font-size:21px;font-weight:700;letter-spacing:.02em;color:var(--p);margin-bottom:14px;line-height:1.2;}"
+      + ".body{font-size:14px;color:#3a4150;line-height:1.7;margin-bottom:12px;}"
+      + ".tier-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px;}"
+      + ".tier{border:1px solid var(--rule);border-radius:8px;padding:22px 20px;background:#fff;}"
+      + ".tier.lead{border-color:var(--s);border-width:2px;background:#FFF8F4;}"
+      + ".tier-h{font-family:'Josefin Sans',sans-serif;font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--p);margin-bottom:8px;}"
+      + ".tier-price{font-family:'Josefin Sans',sans-serif;font-size:32px;font-weight:700;color:var(--p);line-height:1;margin-bottom:8px;}"
+      + ".tier.lead .tier-price{color:var(--s);}"
+      + ".tier-desc{font-size:12.5px;color:#5a6175;line-height:1.55;}"
+      + ".pillars{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:#E8E4DC;border-radius:8px;overflow:hidden;margin-top:18px;}"
+      + ".pillar{background:#fff;padding:18px 20px;}"
+      + ".pillar-h{font-family:'Josefin Sans',sans-serif;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--p);margin-bottom:6px;}"
+      + ".pillar-t{font-size:13px;color:#555;line-height:1.6;}"
+      + ".cta{background:var(--p);color:#fff;padding:28px 32px;border-radius:10px;margin-top:40px;}"
+      + ".cta-h{font-family:'Josefin Sans',sans-serif;font-size:9px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--s);margin-bottom:8px;}"
+      + ".cta-t{font-family:'Josefin Sans',sans-serif;font-size:18px;font-weight:700;margin-bottom:10px;}"
+      + ".cta-b{font-size:13px;color:rgba(255,255,255,.78);line-height:1.6;}"
+      + ".cta-b a{color:#fff;font-weight:600;}"
+      + ".sig{margin-top:32px;padding-top:24px;border-top:1px solid var(--rule);font-size:13px;color:#666;line-height:1.7;}"
+      + ".sig strong{color:var(--p);}"
+      + "@media(max-width:640px){.page{padding:28px 22px;}.tier-grid,.pillars{grid-template-columns:1fr;}}";
+  }
+
+  function buildBannerPromoHtml(f) {
+    var short = f.schoolShort || f.schoolName;
+    var mascot = f.mascot || short;
+    var isHS = (f.schoolType || '').toLowerCase().indexOf('high') > -1 || (f.gradeRange || '').match(/9|10|11|12/);
+    var fallLabel = isHS ? "Senior banners (fall sports)" : "8th-grade banners (fall sports)";
+    var fallSub = isHS ? "Football, cheer, dance, volleyball &mdash; every fall sport" : "Football, cheer, volleyball &mdash; every fall sport";
+    var sigBlurb = "Nathan Bingle &middot; Owner, Nathan Bingle Photography";
+
+    return "<!DOCTYPE html><html lang=\"en\"><head>"
+      + "<meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\">"
+      + "<title>" + esc(short) + " &mdash; Banner Program</title>"
+      + "<link href=\"https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600;700&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap\" rel=\"stylesheet\">"
+      + "<style>" + bannerPromoStyles() + "</style>"
+      + "</head><body>"
+      + "<div class=\"page\">"
+      + "<div class=\"masthead\"><div class=\"wordmark\">Nathan Bingle Photography</div>"
+      + "<div class=\"meta\"><strong>" + esc(short) + "</strong><br>Banner Partnership Proposal</div></div>"
+      + "<div class=\"hero\">"
+      + "<div class=\"kicker\">For the " + esc(short) + " " + esc(mascot) + " Booster Club</div>"
+      + "<h1 class=\"h1\">A photo partnership built for schools like yours &mdash; and your booster's fall banners are <span class=\"accent\">on us.</span></h1>"
+      + "<p class=\"lede\">I'm Nathan Bingle, a Fort Mill&ndash;based photographer. I run the photography program at Pleasant Knoll Middle and shoot the majority of rec league youth sports across Fort Mill and Lancaster County. I just rolled out a banner program that will save your booster real money &mdash; here's how.</p>"
+      + "</div>"
+      + "<div class=\"section\">"
+      + "<div class=\"tag\">Banner Pricing</div>"
+      + "<h2 class=\"h2\">Three tiers. One simple promise.</h2>"
+      + "<div class=\"tier-grid\">"
+      + "<div class=\"tier lead\"><div class=\"tier-h\">Fall</div><div class=\"tier-price\">$0</div><div class=\"tier-desc\"><strong>" + fallLabel + "</strong> are on us. " + fallSub + ". Your booster pays nothing.</div></div>"
+      + "<div class=\"tier\"><div class=\"tier-h\">Winter</div><div class=\"tier-price\">$10<span style=\"font-size:14px;color:#999;\">/ea</span></div><div class=\"tier-desc\">About half what most boosters in the area are paying right now.</div></div>"
+      + "<div class=\"tier\"><div class=\"tier-h\">Spring</div><div class=\"tier-price\">$10<span style=\"font-size:14px;color:#999;\">/ea</span></div><div class=\"tier-desc\">Same flat rate as winter. Predictable cost, no surprises.</div></div>"
+      + "</div></div>"
+      + "<div class=\"section\">"
+      + "<div class=\"tag\">What " + esc(short) + " Gets</div>"
+      + "<h2 class=\"h2\">A complete photo program, not just banners.</h2>"
+      + "<p class=\"body\">The banner pricing above is part of a full school photo partnership. Beyond banners, you get picture day, team and individual photos every season, custom team composites, online ordering shipped directly to families, and zero administrative burden on the school office.</p>"
+      + "<div class=\"pillars\">"
+      + "<div class=\"pillar\"><div class=\"pillar-h\">Zero School Cost</div><div class=\"pillar-t\">No fees, no minimums, no upfront spend. Parents pay only if they choose to buy.</div></div>"
+      + "<div class=\"pillar\"><div class=\"pillar-h\">Local &amp; 10 Min Away</div><div class=\"pillar-t\">Fort Mill&ndash;based. If something needs reshooting or fixing, I'm not a regional rep three states away.</div></div>"
+      + "<div class=\"pillar\"><div class=\"pillar-h\">Background-Checked</div><div class=\"pillar-t\">All staff cleared before stepping on campus. $2M commercial liability coverage.</div></div>"
+      + "<div class=\"pillar\"><div class=\"pillar-h\">Member, PPA</div><div class=\"pillar-t\">Professional Photographers of America &mdash; trained, insured, accountable.</div></div>"
+      + "</div></div>"
+      + "<div class=\"cta\">"
+      + "<div class=\"cta-h\">Next Step</div>"
+      + "<div class=\"cta-t\">Want the full details? Let's talk.</div>"
+      + "<p class=\"cta-b\">Call or text <strong>704-558-6566</strong> &middot; email <a href=\"mailto:nathan@nathanbinglephotography.com\">nathan@nathanbinglephotography.com</a><br>I'm happy to drive out to " + esc(short) + " or hop on a quick call &mdash; whichever works for your booster.</p>"
+      + "</div>"
+      + "<div class=\"sig\"><strong>Nathan Bingle</strong><br>Owner, Nathan Bingle Photography<br>nathanbinglephotography.com</div>"
+      + "</div></body></html>";
+  }
+
+  /* ============================================================
+   * AD BRIEFING TEMPLATE
+   * Banner-led + Local Proof + Two Styles + AD-FAQ
+   * ============================================================ */
+  function adBriefingStyles() {
+    return ":root{--p:#15254A;--p-deep:#0D1830;--s:#E54D1F;--paper:#fff;--paper-warm:#F7F4EF;--ink:#1A2030;--muted:#6B7180;--rule:#E3DED4;}"
+      + "*{box-sizing:border-box;margin:0;padding:0;}"
+      + "html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}"
+      + "body{font-family:'Poppins',-apple-system,BlinkMacSystemFont,sans-serif;background:#F7F6F2;color:var(--ink);line-height:1.6;font-size:14.5px;}"
+      + ".page{max-width:920px;margin:0 auto;padding:48px 56px;background:#fff;}"
+      + ".masthead{display:flex;justify-content:space-between;align-items:flex-end;padding-bottom:18px;border-bottom:2px solid var(--p);margin-bottom:40px;}"
+      + ".wordmark{font-family:'Josefin Sans',sans-serif;font-weight:700;letter-spacing:.14em;font-size:19px;color:var(--p);text-transform:uppercase;}"
+      + ".meta{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);text-align:right;line-height:1.8;font-weight:500;}"
+      + ".meta strong{color:var(--p);font-weight:700;}"
+      + ".hero{margin-bottom:40px;}"
+      + ".kicker{font-family:'Josefin Sans',sans-serif;font-size:11px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:var(--s);margin-bottom:14px;}"
+      + ".h1{font-family:'Josefin Sans',sans-serif;font-size:30px;font-weight:700;line-height:1.18;color:var(--p);margin-bottom:14px;}"
+      + ".h1 .accent{color:var(--s);}"
+      + ".lede{font-size:15px;color:#3a4150;line-height:1.65;max-width:680px;}"
+      + ".section{margin-bottom:40px;}"
+      + ".tag{display:inline-block;font-family:'Josefin Sans',sans-serif;font-size:9px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:var(--p);background:#F2EBE4;padding:5px 12px;border-radius:30px;margin-bottom:12px;}"
+      + ".h2{font-family:'Josefin Sans',sans-serif;font-size:22px;font-weight:700;letter-spacing:.02em;color:var(--p);margin-bottom:14px;line-height:1.2;}"
+      + ".body{font-size:14px;color:#3a4150;line-height:1.7;margin-bottom:12px;}"
+      + ".tier-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px;}"
+      + ".tier{border:1px solid var(--rule);border-radius:8px;padding:20px;background:#fff;}"
+      + ".tier.lead{border-color:var(--s);border-width:2px;background:#FFF8F4;}"
+      + ".tier-h{font-family:'Josefin Sans',sans-serif;font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--p);margin-bottom:8px;}"
+      + ".tier-price{font-family:'Josefin Sans',sans-serif;font-size:30px;font-weight:700;color:var(--p);line-height:1;margin-bottom:8px;}"
+      + ".tier.lead .tier-price{color:var(--s);}"
+      + ".tier-desc{font-size:12.5px;color:#5a6175;line-height:1.55;}"
+      + ".image-card{margin-top:24px;border-radius:10px;overflow:hidden;box-shadow:0 4px 18px rgba(0,0,0,.08);background:#fff;}"
+      + ".image-card img{width:100%;height:auto;display:block;}"
+      + ".caption{margin-top:14px;text-align:center;color:#888;font-style:italic;font-size:12px;}"
+      + ".pillars{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:#E8E4DC;border-radius:8px;overflow:hidden;margin-top:18px;}"
+      + ".pillar{background:#fff;padding:20px 22px;}"
+      + ".pillar-h{font-family:'Josefin Sans',sans-serif;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--p);margin-bottom:6px;}"
+      + ".pillar-t{font-size:13px;color:#555;line-height:1.6;}"
+      + ".faq-item{background:#fff;border-radius:8px;padding:18px 22px;margin-bottom:10px;border-left:3px solid var(--s);}"
+      + ".faq-q{font-family:'Josefin Sans',sans-serif;font-size:13px;font-weight:700;color:var(--p);margin-bottom:6px;}"
+      + ".faq-a{font-size:13px;color:#555;line-height:1.7;}"
+      + ".cta{background:var(--p);color:#fff;padding:32px 36px;border-radius:10px;margin-top:40px;}"
+      + ".cta-h{font-family:'Josefin Sans',sans-serif;font-size:9px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--s);margin-bottom:8px;}"
+      + ".cta-t{font-family:'Josefin Sans',sans-serif;font-size:20px;font-weight:700;margin-bottom:10px;}"
+      + ".cta-b{font-size:13px;color:rgba(255,255,255,.78);line-height:1.6;}"
+      + ".cta-b a{color:#fff;font-weight:600;}"
+      + ".sig{margin-top:32px;padding-top:24px;border-top:1px solid var(--rule);font-size:13px;color:#666;line-height:1.7;}"
+      + ".sig strong{color:var(--p);}"
+      + "@media(max-width:640px){.page{padding:28px 22px;}.tier-grid,.pillars{grid-template-columns:1fr;}}";
+  }
+
+  function buildAdBriefingHtml(f) {
+    var short = f.schoolShort || f.schoolName;
+    var mascot = f.mascot || short;
+    var isHS = (f.schoolType || '').toLowerCase().indexOf('high') > -1 || (f.gradeRange || '').match(/9|10|11|12/);
+    var fallLabel = isHS ? "Senior banners (fall sports)" : "8th-grade banners (fall sports)";
+    var fallSub = isHS ? "Football, cheer, dance, volleyball &mdash; every fall sport" : "Football, cheer, volleyball &mdash; every fall sport";
+    var imgBase = "https://nathangbingle.github.io/nbp-school-proposals/images";
+
+    return "<!DOCTYPE html><html lang=\"en\"><head>"
+      + "<meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\">"
+      + "<title>" + esc(short) + " &mdash; AD Briefing</title>"
+      + "<link href=\"https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600;700&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap\" rel=\"stylesheet\">"
+      + "<style>" + adBriefingStyles() + "</style>"
+      + "</head><body>"
+      + "<div class=\"page\">"
+      + "<div class=\"masthead\"><div class=\"wordmark\">Nathan Bingle Photography</div>"
+      + "<div class=\"meta\"><strong>" + esc(short) + "</strong><br>Athletic Director Briefing</div></div>"
+      + "<div class=\"hero\">"
+      + "<div class=\"kicker\">For the " + esc(short) + " " + esc(mascot) + " Athletic Director</div>"
+      + "<h1 class=\"h1\">A complete photo program for " + esc(short) + " athletics &mdash; with banner savings <span class=\"accent\">that go straight to your booster.</span></h1>"
+      + "<p class=\"lede\">I'm Nathan Bingle, a Fort Mill&ndash;based photographer. I run the program at Pleasant Knoll Middle and shoot the majority of rec league youth sports across Fort Mill and Lancaster County. This briefing is structured around what an AD actually needs from a photo partner: <strong>quality you don't have to babysit</strong>, a process that puts no extra work on your front office, and a program that delivers everything &mdash; team photos, individual portraits, banners, signing days, senior nights &mdash; under one roof.</p>"
+      + "</div>"
+      + "<div class=\"section\">"
+      + "<div class=\"tag\">Banner Program</div>"
+      + "<h2 class=\"h2\">Real money back to your booster.</h2>"
+      + "<p class=\"body\">When the booster saves on banners, that money goes back into uniforms, equipment, travel, and end-of-season events. The banner program is the entry point &mdash; the photo program is what makes the whole partnership worth doing.</p>"
+      + "<div class=\"tier-grid\">"
+      + "<div class=\"tier lead\"><div class=\"tier-h\">Fall</div><div class=\"tier-price\">$0</div><div class=\"tier-desc\"><strong>" + fallLabel + "</strong> are on us. " + fallSub + ". Your booster pays nothing.</div></div>"
+      + "<div class=\"tier\"><div class=\"tier-h\">Winter</div><div class=\"tier-price\">$10<span style=\"font-size:14px;color:#999;\">/ea</span></div><div class=\"tier-desc\">About half what most boosters in the area are paying right now.</div></div>"
+      + "<div class=\"tier\"><div class=\"tier-h\">Spring</div><div class=\"tier-price\">$10<span style=\"font-size:14px;color:#999;\">/ea</span></div><div class=\"tier-desc\">Same flat rate. Predictable cost, no surprises.</div></div>"
+      + "</div></div>"
+      + "<div class=\"section\">"
+      + "<div class=\"tag\">Local Proof</div>"
+      + "<h2 class=\"h2\">We already work in the area.</h2>"
+      + "<p class=\"body\">Recent team composite work for <strong>Catawba Ridge HS Band</strong>, <strong>Fort Mill Volleyball</strong>, and the Carolina Reapers football program &mdash; custom branded backgrounds, full team rosters, modern composite style. The same kind of work I'd deliver for " + esc(short) + ".</p>"
+      + "<div class=\"image-card\"><img src=\"" + imgBase + "/team-composites.jpg\" alt=\"Team composite samples\"></div>"
+      + "</div>"
+      + "<div class=\"section\">"
+      + "<div class=\"tag\">Two Styles, One Photographer</div>"
+      + "<h2 class=\"h2\">Whatever look fits your program &mdash; we deliver both.</h2>"
+      + "<p class=\"body\">Most schools in this area are used to a natural-light outdoor style &mdash; clean, classic, the look families expect. We do that style well. We also do modern dramatic composite work for senior banners, signing day, and premium team work. <strong>Most photographers offer one or the other. We do both, and we do both well.</strong></p>"
+      + "<p class=\"body\">You and your booster choose the style year by year, sport by sport &mdash; or mix them. Classic team photos in the natural-light style your families know, with composite-style senior banners and signing day portraits as the premium tier. Whatever " + esc(short) + " wants.</p>"
+      + "<div class=\"image-card\"><img src=\"" + imgBase + "/media-day-portraits.jpg\" alt=\"Athlete media day portraits\"></div>"
+      + "<p class=\"caption\">Athlete Media Day individual portraits &mdash; available as a premium tier for senior nights and standout athletes.</p>"
+      + "</div>"
+      + "<div class=\"section\">"
+      + "<div class=\"tag\">Reliability &amp; Operations</div>"
+      + "<h2 class=\"h2\">No extra work for the AD's office.</h2>"
+      + "<div class=\"pillars\">"
+      + "<div class=\"pillar\"><div class=\"pillar-h\">Reliable Execution</div><div class=\"pillar-t\">Picture day runs without you having to micromanage it. We handle scheduling, parent comms, on-site setup, and follow-up.</div></div>"
+      + "<div class=\"pillar\"><div class=\"pillar-h\">Zero School Cost</div><div class=\"pillar-t\">No fees, no minimums. The school office never invoices a family or handles a transaction.</div></div>"
+      + "<div class=\"pillar\"><div class=\"pillar-h\">Background-Checked</div><div class=\"pillar-t\">All staff cleared before stepping on campus. $2M commercial liability coverage.</div></div>"
+      + "<div class=\"pillar\"><div class=\"pillar-h\">Local &amp; Embedded</div><div class=\"pillar-t\">Based in Fort Mill. If something needs reshooting, I'm 10 minutes away &mdash; not a regional rep.</div></div>"
+      + "</div></div>"
+      + "<div class=\"section\">"
+      + "<div class=\"tag\">FAQ</div>"
+      + "<h2 class=\"h2\">Likely questions, answered.</h2>"
+      + "<div class=\"faq-item\"><div class=\"faq-q\">What's the AD's actual workload during a typical season?</div><div class=\"faq-a\">Provide a roster, point us at a space on picture day, and approve a parent communication. We do the rest &mdash; including handling parent service issues directly so they don't reach your office. Most AD partners spend under 90 minutes per season actively interacting with the photo program.</div></div>"
+      + "<div class=\"faq-item\"><div class=\"faq-q\">What if my coaches have specific style preferences?</div><div class=\"faq-a\">We accommodate. Some sports want clean classic team photos, others want dramatic composites, others want the natural-light outdoor look. Coaches tell us what they want, we deliver. No drama.</div></div>"
+      + "<div class=\"faq-item\"><div class=\"faq-q\">Is " + esc(short) + " on the hook for any cost?</div><div class=\"faq-a\">No. There's no fee, retainer, or minimum spend. The school is never invoiced. Parents pay only for portraits they choose to order, directly through the online gallery.</div></div>"
+      + "<div class=\"faq-item\"><div class=\"faq-q\">How is student data protected?</div><div class=\"faq-a\">Student data " + esc(short) + " provides is used solely to fulfill the photography program. We do not sell, lease, or share it. All school-provided data is deleted or returned within 30 days of agreement termination, except as needed to fulfill open parent orders or as required by law.</div></div>"
+      + "</div>"
+      + "<div class=\"cta\">"
+      + "<div class=\"cta-h\">Next Step</div>"
+      + "<div class=\"cta-t\">15 minutes is all I'm asking for.</div>"
+      + "<p class=\"cta-b\">Call or text <strong>704-558-6566</strong> &middot; email <a href=\"mailto:nathan@nathanbinglephotography.com\">nathan@nathanbinglephotography.com</a><br>I'll come to " + esc(short) + " &mdash; I'm 10 minutes away.</p>"
+      + "</div>"
+      + "<div class=\"sig\"><strong>Nathan Bingle</strong><br>Owner, Nathan Bingle Photography<br>Member, Professional Photographers of America &middot; nathanbinglephotography.com</div>"
+      + "</div></body></html>";
+  }
+
   function buildProposalHtml(f) {
     var mascot = f.mascot || f.schoolShort || f.schoolName;
     var short = f.schoolShort || f.schoolName;
@@ -1235,9 +1452,16 @@
       return;
     }
 
-    var src = previewMode === "proposal"
-      ? buildProposalHtml(f)
-      : '<html><body style="font-family:Arial;padding:40px;max-width:720px;margin:0 auto;color:#000;">' + buildContractBody(f) + '</body></html>';
+    var src;
+    if (previewMode === "proposal") {
+      src = buildProposalHtml(f);
+    } else if (previewMode === "banner") {
+      src = buildBannerPromoHtml(f);
+    } else if (previewMode === "ad") {
+      src = buildAdBriefingHtml(f);
+    } else {
+      src = '<html><body style="font-family:Arial;padding:40px;max-width:720px;margin:0 auto;color:#000;">' + buildContractBody(f) + '</body></html>';
+    }
 
     var iframe = frame.querySelector("iframe");
     if (!iframe) {
@@ -1311,8 +1535,16 @@
   $("btn-download").addEventListener("click", function() {
     var f = readForm();
     if (!f.schoolName || !f.schoolShort) { setStatus("Complete the school info first.", "error"); return; }
-    downloadFile(fileName(f.schoolName) + "_Proposal.html", buildProposalHtml(f), "text/html");
-    setStatus("✓ Downloaded " + fileName(f.schoolName) + "_Proposal.html", "success");
+    var html, suffix;
+    if (previewMode === "banner") {
+      html = buildBannerPromoHtml(f); suffix = "_BannerPromo.html";
+    } else if (previewMode === "ad") {
+      html = buildAdBriefingHtml(f); suffix = "_AD_Briefing.html";
+    } else {
+      html = buildProposalHtml(f); suffix = "_Proposal.html";
+    }
+    downloadFile(fileName(f.schoolName) + suffix, html, "text/html");
+    setStatus("✓ Downloaded " + fileName(f.schoolName) + suffix, "success");
   });
 
   $("btn-contract").addEventListener("click", function() {
