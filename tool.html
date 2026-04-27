@@ -1637,11 +1637,29 @@
     setStatus("Publishing to GitHub Pages…", "info");
 
     try {
-      var filename = slugName(f.schoolName) + ".html";
-      var html = buildProposalHtml(f);
+      // Pick template + filename suffix based on the active preview tab
+      var html, filenameSuffix, label;
+      if (previewMode === "banner") {
+        html = buildBannerPromoHtml(f);
+        filenameSuffix = "-banner";
+        label = "Banner Promo";
+      } else if (previewMode === "ad") {
+        html = buildAdBriefingHtml(f);
+        filenameSuffix = "-ad";
+        label = "AD Briefing";
+      } else if (previewMode === "contract") {
+        setStatus("Contracts can be downloaded but aren't published as a public link.", "error");
+        btn.disabled = false; btn.innerHTML = original;
+        return;
+      } else {
+        html = buildProposalHtml(f);
+        filenameSuffix = "";
+        label = "Proposal";
+      }
+      var filename = slugName(f.schoolName) + filenameSuffix + ".html";
       var result = await publishProposal(filename, html);
       var verb = result.updated ? "updated" : "published";
-      setStatus('✓ Proposal ' + verb + '! Live at: <a href="' + result.url + '" target="_blank" rel="noopener">' + result.url + '</a><br><span style="color:#666;font-size:11px">Note: GitHub Pages may take 30–60 seconds to reflect changes.</span>', "success");
+      setStatus('✓ ' + label + ' ' + verb + '! Live at: <a href="' + result.url + '" target="_blank" rel="noopener">' + result.url + '</a><br><span style="color:#666;font-size:11px">Note: GitHub Pages may take 30–60 seconds to reflect changes.</span>', "success");
       state.lastPublishedUrl = result.url;
     } catch(e) {
       setStatus("✗ Publish failed: " + e.message, "error");
