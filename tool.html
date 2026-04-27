@@ -174,6 +174,21 @@
   .nbp-palette-info .src { color: #888; font-size: 11px; display: block; margin-top: 1px; }
   .nbp-palette-toggle { font-size: 10px; color: #B59448; background: none; border: none; cursor: pointer; text-decoration: underline; letter-spacing: 0.04em; }
 
+  /* School logo block */
+  .nbp-logo-block { display: flex; gap: 12px; align-items: stretch; padding: 10px; background: #FAF8F4; border: 1px solid #E8E4DC; border-radius: 6px; }
+  .nbp-logo-preview {
+    width: 80px; height: 80px; flex-shrink: 0; border-radius: 4px; background: #fff;
+    border: 1px solid #E8E4DC; display: flex; align-items: center; justify-content: center;
+    overflow: hidden; padding: 6px;
+  }
+  .nbp-logo-preview img { max-width: 100%; max-height: 100%; object-fit: contain; }
+  .nbp-logo-preview span { color: #B0AAA0; font-size: 10px; text-align: center; padding: 4px; line-height: 1.4; }
+  .nbp-logo-controls { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+  .nbp-logo-status { font-size: 11px; color: #888; line-height: 1.4; }
+  .nbp-logo-status.success { color: #2C7A3E; }
+  .nbp-logo-status.error { color: #B03030; }
+  .nbp-logo-status.loading { color: #888; font-style: italic; }
+
   .nbp-check {
     display: flex; gap: 10px; align-items: flex-start; cursor: pointer;
     padding: 6px 0; font-size: 13px; color: #555; line-height: 1.5;
@@ -406,6 +421,25 @@
           </div>
         </div>
 
+        <!-- School logo (auto-found, manually overridable) -->
+        <div class="nbp-field" id="logo-field">
+          <label>School logo <span style="font-weight:400;color:#888">(used in branded proposals)</span></label>
+          <div class="nbp-logo-block">
+            <div class="nbp-logo-preview" id="logo-preview">
+              <span id="logo-preview-empty">No logo yet</span>
+              <img id="logo-preview-img" alt="School logo" style="display:none">
+            </div>
+            <div class="nbp-logo-controls">
+              <div id="logo-status" class="nbp-logo-status">Run research to auto-find a logo</div>
+              <div style="display:flex;gap:6px;margin-top:8px">
+                <input type="url" id="f-logoUrl" class="nbp-input" placeholder="Or paste a logo URL" style="flex:1;font-size:12px">
+                <button type="button" class="nbp-btn nbp-btn-secondary" id="btn-fetch-logo" style="font-size:11px;padding:8px 12px">Fetch</button>
+              </div>
+              <button type="button" class="nbp-btn-link" id="btn-clear-logo" style="background:none;border:none;color:#888;font-size:11px;cursor:pointer;margin-top:6px;padding:0;text-decoration:underline">Remove logo</button>
+            </div>
+          </div>
+        </div>
+
         <!-- Staff contacts found by AI -->
         <div class="nbp-field">
           <label>School contacts <span style="font-weight:400;color:#888">(AI fills in what it can find — empty means no published email)</span></label>
@@ -538,7 +572,11 @@
       {role: "Yearbook Coordinator", name: "", email: ""},
       {role: "Secretary",            name: "", email: ""}
     ],
-    selectedContactIdx: 0
+    selectedContactIdx: 0,
+    // Logo: AI-found URL → fetched as base64 data URL → embedded in templates
+    logoUrl: null,           // original URL from research or manual paste
+    logoDataUrl: null,       // base64 data URL ready for embedding
+    logoNote: null           // human-readable source description
   };
 
   /* ================== UTIL ================== */
@@ -653,6 +691,7 @@
       governedBy:      $("f-governedBy") ? $("f-governedBy").value : "",
       managedBy:       $("f-managedBy") ? $("f-managedBy").value : "",
       customNote:      $("f-customNote").value,
+      logoDataUrl:     state.logoDataUrl || null,
       notes:           (state.research && state.research.notes) || ""
     };
   }
@@ -755,6 +794,19 @@
       $("charter-fields").style.display = "none";
     }
 
+    // Logo: AI may return a logoUrl. Auto-fetch it via /logo-resolve.
+    state.logoUrl = null;
+    state.logoDataUrl = null;
+    state.logoNote = r.logoNote || null;
+    if (r.logoUrl) {
+      $("f-logoUrl").value = r.logoUrl;
+      fetchLogoFromUrl(r.logoUrl);  // async, no await needed
+    } else {
+      $("f-logoUrl").value = "";
+      setLogoStatus("AI couldn't find a school logo — paste a URL to use one", "");
+      renderLogoPreview();
+    }
+
     // Staff contacts
     var contacts = Array.isArray(r.contacts) && r.contacts.length
       ? r.contacts
@@ -798,6 +850,64 @@
       });
       box.appendChild(row);
     });
+  }
+
+  /* ================== SCHOOL LOGO ================== */
+  function setLogoStatus(text, kind) {
+    var el = $("logo-status");
+    if (!el) return;
+    el.textContent = text;
+    el.className = "nbp-logo-status" + (kind ? " " + kind : "");
+  }
+
+  function renderLogoPreview() {
+    var img = $("logo-preview-img");
+    var empty = $("logo-preview-empty");
+    if (state.logoDataUrl) {
+      img.src = state.logoDataUrl;
+      img.style.display = "block";
+      empty.style.display = "none";
+    } else {
+      img.style.display = "none";
+      img.removeAttribute("src");
+      empty.style.display = "block";
+    }
+  }
+
+  async function fetchLogoFromUrl(url) {
+    if (!url) return;
+    setLogoStatus("Fetching logo…", "loading");
+    state.logoUrl = url;
+    try {
+      var res = await fetch(API_BASE + "/logo-resolve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-NBP-Key": TOOL_SECRET },
+        body: JSON.stringify({ url: url })
+      });
+      if (!res.ok) {
+        var err = await res.json().catch(function(){ return {}; });
+        throw new Error(err.error || ("HTTP " + res.status));
+      }
+      var data = await res.json();
+      if (!data.ok || !data.dataUrl) throw new Error("No logo data returned");
+      state.logoDataUrl = data.dataUrl;
+      var kb = (data.bytes / 1024).toFixed(0);
+      setLogoStatus("✓ Logo loaded (" + kb + " KB) — will appear in branded proposals", "success");
+      renderLogoPreview();
+    } catch (e) {
+      state.logoDataUrl = null;
+      setLogoStatus("Couldn't fetch logo: " + e.message, "error");
+      renderLogoPreview();
+    }
+  }
+
+  function clearLogo() {
+    state.logoUrl = null;
+    state.logoDataUrl = null;
+    state.logoNote = null;
+    $("f-logoUrl").value = "";
+    setLogoStatus("Logo removed. Run research or paste a URL to set one.", "");
+    renderLogoPreview();
   }
 
   /* ================== PROPOSAL HTML ================== */
@@ -932,7 +1042,9 @@
       + "html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}"
       + "body{font-family:'Poppins',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--paper);color:var(--ink);line-height:1.6;font-size:14.5px;}"
       + ".page{max-width:880px;margin:0 auto;padding:48px 56px;background:#fff;}"
-      + ".masthead{display:flex;justify-content:space-between;align-items:flex-end;padding-bottom:18px;border-bottom:2px solid var(--p);margin-bottom:40px;}"
+      + ".masthead{display:flex;justify-content:space-between;align-items:center;padding-bottom:18px;border-bottom:2px solid var(--p);margin-bottom:40px;gap:20px;}"
+      + ".school-logo{flex:0 0 auto;display:flex;align-items:center;justify-content:center;}"
+      + ".school-logo img{max-height:60px;max-width:110px;width:auto;height:auto;display:block;}"
       + ".wordmark{font-family:'Josefin Sans',sans-serif;font-weight:700;letter-spacing:.14em;font-size:19px;color:var(--p);text-transform:uppercase;}"
       + ".meta{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);text-align:right;line-height:1.8;font-weight:500;}"
       + ".meta strong{color:var(--p);font-weight:700;}"
@@ -982,6 +1094,7 @@
       + "</head><body>"
       + "<div class=\"page\">"
       + "<div class=\"masthead\"><div class=\"wordmark\">Nathan Bingle Photography</div>"
+      + (f.logoDataUrl ? "<div class=\"school-logo\"><img src=\"" + f.logoDataUrl + "\" alt=\"" + esc(short) + " logo\"></div>" : "")
       + "<div class=\"meta\"><strong>" + esc(short) + "</strong><br>Banner Partnership Proposal</div></div>"
       + "<div class=\"hero\">"
       + "<div class=\"kicker\">For the " + esc(short) + " " + esc(mascot) + " Booster Club</div>"
@@ -1028,7 +1141,9 @@
       + "html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}"
       + "body{font-family:'Poppins',-apple-system,BlinkMacSystemFont,sans-serif;background:#F7F6F2;color:var(--ink);line-height:1.6;font-size:14.5px;}"
       + ".page{max-width:920px;margin:0 auto;padding:48px 56px;background:#fff;}"
-      + ".masthead{display:flex;justify-content:space-between;align-items:flex-end;padding-bottom:18px;border-bottom:2px solid var(--p);margin-bottom:40px;}"
+      + ".masthead{display:flex;justify-content:space-between;align-items:center;padding-bottom:18px;border-bottom:2px solid var(--p);margin-bottom:40px;gap:20px;}"
+      + ".school-logo{flex:0 0 auto;display:flex;align-items:center;justify-content:center;}"
+      + ".school-logo img{max-height:60px;max-width:110px;width:auto;height:auto;display:block;}"
       + ".wordmark{font-family:'Josefin Sans',sans-serif;font-weight:700;letter-spacing:.14em;font-size:19px;color:var(--p);text-transform:uppercase;}"
       + ".meta{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);text-align:right;line-height:1.8;font-weight:500;}"
       + ".meta strong{color:var(--p);font-weight:700;}"
@@ -1084,6 +1199,7 @@
       + "</head><body>"
       + "<div class=\"page\">"
       + "<div class=\"masthead\"><div class=\"wordmark\">Nathan Bingle Photography</div>"
+      + (f.logoDataUrl ? "<div class=\"school-logo\"><img src=\"" + f.logoDataUrl + "\" alt=\"" + esc(short) + " logo\"></div>" : "")
       + "<div class=\"meta\"><strong>" + esc(short) + "</strong><br>Athletic Director Briefing</div></div>"
       + "<div class=\"hero\">"
       + "<div class=\"kicker\">For the " + esc(short) + " " + esc(mascot) + " Athletic Director</div>"
@@ -1551,6 +1667,18 @@
 
   /* ================== EVENT WIRING ================== */
   $("btn-research").addEventListener("click", doResearch);
+
+  // Logo fetch + clear handlers
+  $("btn-fetch-logo").addEventListener("click", function() {
+    var url = ($("f-logoUrl").value || "").trim();
+    if (!url) { setLogoStatus("Paste a logo URL first", "error"); return; }
+    fetchLogoFromUrl(url);
+  });
+  $("btn-clear-logo").addEventListener("click", clearLogo);
+  // Allow Enter in the logo URL input to trigger fetch
+  $("f-logoUrl").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") { e.preventDefault(); $("btn-fetch-logo").click(); }
+  });
   $("f-schoolName").addEventListener("keydown", function(e) {
     if (e.key === "Enter") { e.preventDefault(); doResearch(); }
   });
