@@ -923,8 +923,11 @@
    * BANNER PROMO TEMPLATE
    * Banner-program-led, single-page, lean (booster outreach use case)
    * ============================================================ */
-  function bannerPromoStyles() {
-    return ":root{--p:#15254A;--p-deep:#0D1830;--s:#E54D1F;--paper:#fff;--paper-warm:#F7F4EF;--ink:#1A2030;--muted:#6B7180;--rule:#E3DED4;}"
+  function bannerPromoStyles(f) {
+    var p = (f && f.paletteP) || "#15254A";
+    var pDeep = (f && f.palettePDeep) || "#0D1830";
+    var s = (f && f.paletteS) || "#E54D1F";
+    return ":root{--p:" + p + ";--p-deep:" + pDeep + ";--s:" + s + ";--paper:#fff;--paper-warm:#F7F4EF;--ink:#1A2030;--muted:#6B7180;--rule:#E3DED4;}"
       + "*{box-sizing:border-box;margin:0;padding:0;}"
       + "html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}"
       + "body{font-family:'Poppins',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--paper);color:var(--ink);line-height:1.6;font-size:14.5px;}"
@@ -975,7 +978,7 @@
       + "<meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\">"
       + "<title>" + esc(short) + " &mdash; Banner Program</title>"
       + "<link href=\"https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600;700&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap\" rel=\"stylesheet\">"
-      + "<style>" + bannerPromoStyles() + "</style>"
+      + "<style>" + bannerPromoStyles(f) + "</style>"
       + "</head><body>"
       + "<div class=\"page\">"
       + "<div class=\"masthead\"><div class=\"wordmark\">Nathan Bingle Photography</div>"
@@ -1016,8 +1019,11 @@
    * AD BRIEFING TEMPLATE
    * Banner-led + Local Proof + Two Styles + AD-FAQ
    * ============================================================ */
-  function adBriefingStyles() {
-    return ":root{--p:#15254A;--p-deep:#0D1830;--s:#E54D1F;--paper:#fff;--paper-warm:#F7F4EF;--ink:#1A2030;--muted:#6B7180;--rule:#E3DED4;}"
+  function adBriefingStyles(f) {
+    var p = (f && f.paletteP) || "#15254A";
+    var pDeep = (f && f.palettePDeep) || "#0D1830";
+    var s = (f && f.paletteS) || "#E54D1F";
+    return ":root{--p:" + p + ";--p-deep:" + pDeep + ";--s:" + s + ";--paper:#fff;--paper-warm:#F7F4EF;--ink:#1A2030;--muted:#6B7180;--rule:#E3DED4;}"
       + "*{box-sizing:border-box;margin:0;padding:0;}"
       + "html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}"
       + "body{font-family:'Poppins',-apple-system,BlinkMacSystemFont,sans-serif;background:#F7F6F2;color:var(--ink);line-height:1.6;font-size:14.5px;}"
@@ -1074,7 +1080,7 @@
       + "<meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\">"
       + "<title>" + esc(short) + " &mdash; AD Briefing</title>"
       + "<link href=\"https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600;700&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap\" rel=\"stylesheet\">"
-      + "<style>" + adBriefingStyles() + "</style>"
+      + "<style>" + adBriefingStyles(f) + "</style>"
       + "</head><body>"
       + "<div class=\"page\">"
       + "<div class=\"masthead\"><div class=\"wordmark\">Nathan Bingle Photography</div>"
