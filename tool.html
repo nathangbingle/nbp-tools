@@ -315,6 +315,39 @@
     .nbp-empty-arrow { display: none; } /* arrow points to a sidebar that's now stacked above */
     .nbp-empty-title { font-size: 14px; }
   }
+
+  /* Mode toggle (School/Sports) */
+  .nbp-mode-toggle {
+    display: flex;
+    gap: 0;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid #D8D4CC;
+    background: #F7F6F2;
+  }
+  .nbp-mode-btn {
+    padding: 6px 16px;
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    background: transparent;
+    color: #888;
+    transition: all 0.15s;
+  }
+  .nbp-mode-btn.active {
+    background: #B59448;
+    color: #fff;
+  }
+  .nbp-mode-btn:hover:not(.active) {
+    color: #B59448;
+  }
+  .sports-only { display: none; }
+  .nbp-smart.sports-mode .sports-only { display: block; }
+  .nbp-smart.sports-mode .school-only { display: none; }
 </style>
 
 <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -325,7 +358,13 @@
       <div class="nbp-sh-brand">Nathan Bingle</div>
       <div class="nbp-sh-sub">Photography · Internal Tools</div>
     </div>
-    <div class="nbp-sh-right">Proposal Builder v2</div>
+    <div style="display:flex;align-items:center;gap:14px;">
+      <div class="nbp-mode-toggle">
+        <button class="nbp-mode-btn active" id="mode-school" data-modeswitch="school">School</button>
+        <button class="nbp-mode-btn" id="mode-sports" data-modeswitch="sports">Sports</button>
+      </div>
+      <div class="nbp-sh-right">Proposal Builder v2</div>
+    </div>
   </div>
 
   <div class="nbp-body">
@@ -333,12 +372,12 @@
     <div class="nbp-form">
 
       <div class="nbp-step" id="step-research">
-        <div class="nbp-step-label"><span class="n">1</span>Research the school</div>
+        <div class="nbp-step-label"><span class="n">1</span><span class="school-only" style="display:inline">Research the school</span><span class="sports-only" style="display:none">Research the league</span></div>
         <div class="nbp-research-row">
-          <input type="text" class="nbp-input" id="f-schoolName" placeholder="Banks Trail Middle School" autocomplete="off">
+          <input type="text" class="nbp-input" id="f-schoolName" placeholder="Banks Trail Middle School" data-school-ph="Banks Trail Middle School" data-sports-ph="League or organization name" autocomplete="off">
           <button class="nbp-btn nbp-btn-primary" id="btn-research">Research ↗</button>
         </div>
-        <div class="nbp-tip" id="research-tip">Just type the school name. AI fills in everything else.</div>
+        <div class="nbp-tip" id="research-tip"><span class="school-only" style="display:inline">Just type the school name. AI fills in everything else.</span><span class="sports-only" style="display:none">Type the league name. AI will try to research it — or fill in manually.</span></div>
       </div>
 
       <div class="nbp-step locked" id="step-review">
@@ -350,7 +389,7 @@
             <input type="text" class="nbp-input" id="f-schoolShort">
           </div>
           <div class="nbp-field">
-            <label>Mascot</label>
+            <label><span class="school-only" style="display:inline">Mascot</span><span class="sports-only" style="display:none">Mascot / Nickname</span></label>
             <input type="text" class="nbp-input" id="f-mascot">
           </div>
         </div>
@@ -360,13 +399,13 @@
             <label>City, state</label>
             <input type="text" class="nbp-input" id="f-cityState">
           </div>
-          <div class="nbp-field">
+          <div class="nbp-field school-only">
             <label>Grade range</label>
             <input type="text" class="nbp-input" id="f-gradeRange">
           </div>
         </div>
 
-        <div class="nbp-field">
+        <div class="nbp-field school-only" id="field-schoolType">
           <label>School type</label>
           <select class="nbp-select" id="f-schoolType">
             <option>public elementary school</option>
@@ -380,9 +419,44 @@
             <option>virtual public school</option>
           </select>
         </div>
+        <div class="nbp-field sports-only" id="field-leagueType" style="display:none">
+          <label>League type</label>
+          <select class="nbp-select" id="f-leagueType">
+            <option>youth recreation league</option>
+            <option>travel/select club</option>
+            <option>community athletic association</option>
+            <option>YMCA program</option>
+            <option>church-based league</option>
+            <option>multi-sport franchise</option>
+            <option>competitive club</option>
+            <option>rec department program</option>
+          </select>
+        </div>
+        <div class="sports-only" id="sports-extra-fields" style="display:none">
+          <div class="nbp-row2" style="margin-top:8px">
+            <div class="nbp-field">
+              <label>Sport</label>
+              <input type="text" class="nbp-input" id="f-sport" placeholder="Baseball, Soccer, Multi-sport">
+            </div>
+            <div class="nbp-field">
+              <label>Age range</label>
+              <input type="text" class="nbp-input" id="f-ageRange" placeholder="5-14, 6U-18U">
+            </div>
+          </div>
+          <div class="nbp-row2">
+            <div class="nbp-field">
+              <label>Season</label>
+              <input type="text" class="nbp-input" id="f-season" placeholder="Spring, Fall/Spring, Year-round">
+            </div>
+            <div class="nbp-field">
+              <label>Est. teams</label>
+              <input type="number" class="nbp-input" id="f-estTeams" placeholder="20">
+            </div>
+          </div>
+        </div>
 
         <div class="nbp-field">
-          <label>School colors</label>
+          <label><span class="school-only" style="display:inline">School colors</span><span class="sports-only" style="display:none">League colors</span></label>
           <div class="nbp-palette-row">
             <div class="nbp-swatches">
               <div class="nbp-swatch" id="sw-primary" style="background:#0A2540"></div>
@@ -423,7 +497,7 @@
 
         <!-- School logo (auto-found, manually overridable) -->
         <div class="nbp-field" id="logo-field">
-          <label>School logo <span style="font-weight:400;color:#888">(used in branded proposals)</span></label>
+          <label><span class="school-only" style="display:inline">School logo</span><span class="sports-only" style="display:none">League logo</span> <span style="font-weight:400;color:#888">(used in branded proposals)</span></label>
           <div class="nbp-logo-block">
             <div class="nbp-logo-preview" id="logo-preview">
               <span id="logo-preview-empty">No logo yet</span>
@@ -442,7 +516,7 @@
 
         <!-- Staff contacts found by AI -->
         <div class="nbp-field">
-          <label>School contacts <span style="font-weight:400;color:#888">(AI fills in what it can find — empty means no published email)</span></label>
+          <label><span class="school-only" style="display:inline">School contacts</span><span class="sports-only" style="display:none">League contacts</span> <span style="font-weight:400;color:#888">(AI fills in what it can find — empty means no published email)</span></label>
           <div id="contacts-list" class="nbp-contacts">
             <!-- contact rows populated by applyResearch -->
           </div>
@@ -452,13 +526,21 @@
       <div class="nbp-step locked" id="step-extras">
         <div class="nbp-step-label"><span class="n">3</span>Optional additions</div>
 
-        <label class="nbp-check">
+        <label class="nbp-check school-only">
           <input type="checkbox" id="f-hasSeniors">
           <span>Has a senior class (adds senior portrait language to contract)</span>
         </label>
-        <label class="nbp-check">
+        <label class="nbp-check school-only">
           <input type="checkbox" id="f-recLeagueClaim">
           <span>Show "we photograph your rec league teams" trust signal</span>
+        </label>
+        <label class="nbp-check sports-only" style="display:none">
+          <input type="checkbox" id="f-includeAction">
+          <span>Include action photography pricing</span>
+        </label>
+        <label class="nbp-check sports-only" style="display:none">
+          <input type="checkbox" id="f-includeTradingCards">
+          <span>Include trading cards in packages</span>
         </label>
 
         <div class="nbp-field" style="margin-top: 10px;">
@@ -466,7 +548,7 @@
           <textarea class="nbp-textarea" id="f-customNote" placeholder="e.g. Great meeting yesterday — your new building is the perfect setting for picture day."></textarea>
         </div>
 
-        <div class="nbp-field" id="charter-fields" style="display:none; margin-top:12px;">
+        <div class="nbp-field school-only" id="charter-fields" style="display:none; margin-top:12px;">
           <label style="color:#999">Charter school details (AI detected — edit if needed)</label>
           <div class="nbp-row2">
             <input type="text" class="nbp-input" id="f-governedBy" placeholder="Governing body">
@@ -494,7 +576,7 @@
         <span class="nbp-preview-label">Live preview</span>
         <button class="nbp-tab-pill active" data-mode="proposal">Proposal</button>
         <button class="nbp-tab-pill" data-mode="banner">Banner Promo</button>
-        <button class="nbp-tab-pill" data-mode="ad">AD Briefing</button>
+        <button class="nbp-tab-pill" data-mode="ad" id="tab-ad-label">AD Briefing</button>
         <button class="nbp-tab-pill" data-mode="contract">Contract</button>
       </div>
       <div class="nbp-preview-frame" id="preview-frame">
@@ -558,6 +640,7 @@
   /* ================== STATE ================== */
   // paletteMode: 'nbp' | 'ai' | 'custom'
   var state = {
+    mode: 'school',
     paletteMode: 'nbp',
     aiPrimary: null,
     aiAccent: null,
@@ -572,6 +655,13 @@
       {role: "Athletic Director",    name: "", email: ""},
       {role: "Yearbook Coordinator", name: "", email: ""},
       {role: "Secretary",            name: "", email: ""}
+    ],
+    sportsContacts: [
+      {role: "League Director",       name: "", email: ""},
+      {role: "President/Commissioner", name: "", email: ""},
+      {role: "Registrar",             name: "", email: ""},
+      {role: "Team Coordinator",      name: "", email: ""},
+      {role: "Board Member",          name: "", email: ""}
     ],
     selectedContactIdx: 0,
     // Logo: AI-found URL → fetched as base64 data URL → embedded in templates
@@ -675,6 +765,7 @@
   function readForm() {
     var pal = currentPalette();
     return {
+      mode:            state.mode,
       schoolName:      $("f-schoolName").value,
       schoolShort:     $("f-schoolShort").value,
       mascot:          $("f-mascot").value,
@@ -693,7 +784,14 @@
       managedBy:       $("f-managedBy") ? $("f-managedBy").value : "",
       customNote:      $("f-customNote").value,
       logoDataUrl:     state.logoDataUrl || null,
-      notes:           (state.research && state.research.notes) || ""
+      notes:           (state.research && state.research.notes) || "",
+      sport:           $("f-sport") ? $("f-sport").value : "",
+      ageRange:        $("f-ageRange") ? $("f-ageRange").value : "",
+      season:          $("f-season") ? $("f-season").value : "",
+      estTeams:        $("f-estTeams") ? $("f-estTeams").value : "",
+      leagueType:      $("f-leagueType") ? $("f-leagueType").value : "",
+      includeAction:       $("f-includeAction") ? $("f-includeAction").checked : false,
+      includeTradingCards: $("f-includeTradingCards") ? $("f-includeTradingCards").checked : false
     };
   }
 
@@ -1637,7 +1735,381 @@
     return '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>' + esc(f.schoolName) + ' Photography Agreement</title><style>body{font-family:Arial,sans-serif;font-size:11pt;line-height:1.5;color:#000;max-width:6.5in;margin:1in auto;}h1{font-size:20pt;text-align:center;margin-bottom:0.3in;}h2{font-size:14pt;margin-top:20pt;margin-bottom:8pt;}h3{font-size:12pt;margin-top:14pt;margin-bottom:6pt;}p{margin:6pt 0;}ul{margin:4pt 0;padding-left:24pt;}li{margin:3pt 0;}</style></head><body>' + buildContractBody(f) + '</body></html>';
   }
 
-  /* ================== GITHUB PUBLISH ================== */
+
+
+  /* ============================================================
+   * SPORTS PROPOSAL TEMPLATE
+   * ============================================================ */
+  function buildSportsProposalHtml(f) {
+    var short = f.schoolShort || f.schoolName;
+    var mascot = f.mascot || short;
+    var sport = f.sport || "Youth Sports";
+
+    var pillars = [];
+    pillars.push({ t: 'Fast, Organized Photo Days', b: 'We move athletes through efficiently. No long waits, no frustrated parents.' });
+    pillars.push({ t: 'Professional Quality', b: 'Studio-quality portraits on location. Every athlete looks their best.' });
+    pillars.push({ t: 'Easy Online Ordering', b: 'Parents order from home. No cash, no envelopes, no hassle.' });
+    pillars.push({ t: 'Revenue Share', b: 'Your league earns commission on every package sold.' });
+    if (f.includeAction) {
+      pillars.push({ t: 'Action Photography', b: 'Game-day action shots that capture the intensity and emotion of competition.' });
+    }
+    pillars.push({ t: 'Custom Banners', b: 'Full-size athletic banners featuring your athletes in their team colors.' });
+
+    var pillarsHtml = pillars.map(function(p){
+      return '<div class="pillar"><div class="pillar-title">' + p.t + '</div><p>' + p.b + '</p></div>';
+    }).join('');
+
+    var services = [];
+    services.push({ t: 'Team Portraits', d: 'Posed team photos with coaches. Clean, consistent, professional.' });
+    services.push({ t: 'Individual Portraits', d: 'Multiple pose options per athlete. Background choices available.' });
+    services.push({ t: 'Sibling/Multi-Sport Discount', d: 'Families with multiple athletes get combo pricing.' });
+    services.push({ t: 'Custom Banners', d: '2x6 and 3x5 premium athletic banners printed on vinyl.' });
+    if (f.includeTradingCards) {
+      services.push({ t: 'Trading Cards', d: 'Custom trading card sets featuring individual athletes.' });
+    }
+    if (f.includeAction) {
+      services.push({ t: 'Action Photography', d: 'Professional game-day photography with individual athlete galleries.' });
+    }
+    services.push({ t: 'Digital Downloads', d: 'High-resolution digital images available with every package.' });
+
+    var servicesHtml = services.map(function(s){
+      return '<div class="svc-item"><div class="svc-bar"></div><div class="svc-title">' + s.t + '</div><p class="svc-desc">' + s.d + '</p></div>';
+    }).join('');
+
+    // Sports packages
+    var packages = [
+      { name: "MVP Package", price: "$45", contents: "1 team photo, 2 poses (5&times;7 + 3&times;5 sheet), digital download" },
+      { name: "All-Star Package", price: "$65", contents: "1 team photo, 3 poses (8&times;10, 5&times;7, wallet sheet), digital download, trading cards" },
+      { name: "Champion Package", price: "$85", contents: "1 team photo, 4 poses (8&times;10, 2 5&times;7s, wallet sheet, magnet), digital download, trading cards, banner" },
+      { name: "Banner Only", price: "$55", contents: "Custom 2&times;6 athletic banner" },
+      { name: "Banner Upgrade", price: "$75", contents: "Custom 3&times;5 premium banner" }
+    ];
+    if (f.includeAction) {
+      packages.push({ name: "Action Photo Pack", price: "$35", contents: "10 digital action shots from game day" });
+    }
+    packages.push({ name: "Digital Only", price: "$25", contents: "All poses as high-res digital downloads" });
+
+    var pkgCards = packages.map(function(pkg, idx) {
+      var featured = (idx === 2);
+      var items = pkg.contents.split(", ").map(function(c){ return "<li>" + c + "</li>"; }).join("");
+      return '<div class="pkg-card ' + (featured ? "featured" : "") + '">' +
+             (featured ? '<div class="pkg-badge">Best Value</div>' : "") +
+             '<div class="pkg-name">' + pkg.name + '</div>' +
+             '<div class="pkg-price">' + pkg.price + '</div>' +
+             '<div class="pkg-price-sub">Standard Retail</div>' +
+             '<ul class="pkg-contents">' + items + '</ul></div>';
+    }).join("");
+
+    // Timeline
+    var timelineHtml =
+      '<div class="timeline">' +
+      '<div class="tl-step"><div class="tl-num">1</div><div class="tl-title">Coordinate</div><div class="tl-desc">We\'ll coordinate with your league on photo day logistics.</div></div>' +
+      '<div class="tl-step"><div class="tl-num">2</div><div class="tl-title">Schedule</div><div class="tl-desc">Teams are scheduled in time blocks \u2014 coaches bring their roster.</div></div>' +
+      '<div class="tl-step"><div class="tl-num">3</div><div class="tl-title">Shoot</div><div class="tl-desc">Athletes are photographed in 3\u20135 minutes each.</div></div>' +
+      '<div class="tl-step"><div class="tl-num">4</div><div class="tl-title">Deliver</div><div class="tl-desc">Online galleries go live within 48 hours.</div></div>' +
+      '</div>';
+
+    // Email body for Request Agreement
+    var subj = encodeURIComponent(f.schoolName + " \u2014 Agreement Request");
+    var body = encodeURIComponent("Hi Nathan,\n\nWe\'ve reviewed the proposal and would like to receive the formal photography agreement for " + f.schoolName + " for the upcoming season.\n\nThanks,\n");
+    var mailHref = 'mailto:contact@nathanbinglephotography.com?subject=' + subj + '&body=' + body;
+
+    return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">' +
+      '<title>Nathan Bingle Photography \u2014 ' + esc(f.schoolName) + ' Partnership Proposal</title>' +
+      '<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600;700&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">' +
+      '<style>' + proposalCss(f) + '</style></head><body>' +
+
+      '<header class="site-header"><div><div class="nbp-mark">Nathan Bingle</div><div class="nbp-sub">Photography</div></div>' +
+      '<div class="header-right">' + esc(f.schoolName) + ' \u00b7 Partnership Proposal</div></header>' +
+
+      '<div class="tabs">' +
+      '<button class="tab-btn active" onclick="showTab(0,this)">Overview</button>' +
+      '<button class="tab-btn" onclick="showTab(1,this)">Photo Services</button>' +
+      '<button class="tab-btn" onclick="showTab(2,this)">Pricing</button>' +
+      '<button class="tab-btn" onclick="showTab(3,this)">Next Steps</button>' +
+      '<button class="tab-btn" onclick="showTab(4,this)">Contact</button>' +
+      '</div>' +
+
+      // Tab 0: Overview
+      '<div class="tab-panel active" id="tab-0">' +
+      '<div class="hero"><div class="hero-wm">' + esc((mascot || '').toUpperCase()) + '</div>' +
+      '<div class="hero-inner"><div class="hero-kicker">Youth Sports Photography Partnership</div>' +
+      '<h1 class="hero-title">' + esc(f.schoolName) + ' &times; Nathan Bingle Photography</h1>' +
+      '<div class="hero-sub">' + esc(sport) + (f.ageRange ? ' \u00b7 Ages ' + esc(f.ageRange) : '') + (f.cityState ? ' \u00b7 ' + esc(f.cityState) : '') + '</div>' +
+      '<div class="hero-pills"><div class="hero-pill">' + esc(f.season || "2026") + ' Season</div><div class="hero-pill">Zero league cost</div><div class="hero-pill">Local photographer</div></div>' +
+      '</div><div class="hero-bar"></div></div>' +
+
+      '<div class="section" style="background:#fff"><div class="section-inner two-col">' +
+      '<div><div class="tag">About This Proposal</div>' +
+      '<h2 class="section-h2">Professional photos. <span>Zero chaos on picture day.</span></h2>' +
+      '<p class="body-text">Nathan Bingle Photography partners with youth sports organizations across the Carolinas to deliver professional photo experiences that actually convert \u2014 high participation, strong sales, and zero chaos on picture day.</p>' +
+      '<p class="body-text">We\u2019re a <strong>Member of the Professional Photographers of America</strong>, with 5+ years specializing in youth sports portrait programs across the region.</p>' +
+      (f.customNote ? '<p class="body-text">' + esc(f.customNote) + '</p>' : '') +
+      '</div>' +
+      '<div class="about-img">' +
+      '<svg class="about-img-shield" width="58" height="58" viewBox="0 0 24 24" fill="none" stroke="' + f.paletteS + '" stroke-width="1.4"><path d="M12 2 L4 6 V12 C4 17 7.5 21 12 22 C16.5 21 20 17 20 12 V6 Z"/><path d="M9 12 l2 2 4-4" stroke-width="1.6"/></svg>' +
+      '<div class="about-img-lbl">Built For Sports</div>' +
+      '</div></div></div>' +
+
+      '<div class="section" style="background:var(--light)"><div class="section-inner">' +
+      '<div class="tag">Why Partner With Us</div>' +
+      '<h2 class="section-h2">Designed for <span>youth sports organizations</span></h2>' +
+      '<div class="three-col">' + pillarsHtml + '</div></div></div>' +
+
+      '<div class="quote-band">' +
+      '<blockquote>We don\u2019t just develop photos. We develop relationships.</blockquote>' +
+      '<cite>\u2014 Nathan Bingle, Owner \u00b7 Charlotte, NC</cite></div>' +
+      '</div>' +
+
+      // Tab 1: Photo Services
+      '<div class="tab-panel" id="tab-1">' +
+      '<div class="section" style="background:#fff"><div class="section-inner">' +
+      '<div class="tag">What ' + esc(short) + ' Gets</div>' +
+      '<h2 class="section-h2">Everything <span>' + esc(f.schoolName) + '</span> needs</h2>' +
+      '<p class="body-text" style="max-width:520px;margin-bottom:28px">We customize every package around your league\u2019s specific needs \u2014 team photos, individual portraits, banners, and more.</p>' +
+      '<div class="two-col-eq">' + servicesHtml + '</div>' +
+      '</div></div></div>' +
+
+      // Tab 2: Pricing
+      '<div class="tab-panel" id="tab-2">' +
+      '<div class="section" style="background:#fff"><div class="section-inner">' +
+      '<div class="tag">Packages</div>' +
+      '<h2 class="section-h2">Pricing for <span>' + esc(short) + ' families</span></h2>' +
+      '<p class="body-text">Every athlete gets the same organized, professional experience. Prices shown are standard retail; see Commission Flex for how ' + esc(short) + '\u2019s revenue share can adjust them.</p>' +
+      '<div class="pkg-grid">' + pkgCards + '</div>' +
+
+      '<div class="flex-box">' +
+      '<div class="flex-title">Commission Flex</div>' +
+      '<div class="flex-h">' + esc(short) + ' controls the revenue-share rate</div>' +
+      '<p class="flex-body">Every dollar a family spends (less sales tax and shipping) is split between ' + esc(short) + ' and NBP according to the commission rate you select. Adjustable season to season.</p>' +
+      '<div class="flex-slider"><div class="flex-track"></div>' +
+      '<div class="flex-ticks">' +
+      '<div class="flex-tick"><strong>10%</strong><span>Lowest prices</span></div>' +
+      '<div class="flex-tick anchor"><strong>20%</strong><span>Standard</span></div>' +
+      '<div class="flex-tick"><strong>30%</strong><span>Moderate lift</span></div>' +
+      '<div class="flex-tick"><strong>40%</strong><span>Strong fundraiser</span></div>' +
+      '<div class="flex-tick"><strong>50%</strong><span>Maximum</span></div>' +
+      '</div></div>' +
+      '<div class="flex-example"><strong>Example:</strong> At 20%, the All-Star Package is $65 and ' + esc(short) + ' earns $13 per order. At 30%, it becomes ~$75 with $23 going to the league.</div>' +
+      '</div>' +
+      '</div></div></div>' +
+
+      // Tab 3: Next Steps
+      '<div class="tab-panel" id="tab-3">' +
+      '<div class="section" style="background:#fff"><div class="section-inner">' +
+      '<div class="tag">How It Works</div>' +
+      '<h2 class="section-h2">From proposal <span>to photo day</span></h2>' +
+      '<p class="body-text" style="max-width:540px">Here\u2019s the rhythm we use for every league partner:</p>' +
+      timelineHtml +
+      '<div class="action-band">' +
+      '<div class="action-heading">Ready to Move Forward</div>' +
+      '<div class="action-title">Take the next step</div>' +
+      '<div class="action-sub">Share the proposal with your board or request the agreement \u2014 once you\u2019re ready, we\u2019ll send it straight over.</div>' +
+      '<div class="action-buttons">' +
+      '<button class="act-btn act-btn-primary" onclick="printProposal()">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' +
+      'Download Proposal</button>' +
+      '<a class="act-btn act-btn-secondary" href="' + mailHref + '">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>' +
+      'Request Agreement</a>' +
+      '</div></div></div></div></div>' +
+
+      // Tab 4: Contact
+      '<div class="tab-panel" id="tab-4">' +
+      '<div class="section" style="background:#fff"><div class="section-inner">' +
+      '<div class="tag">Get In Touch</div>' +
+      '<h2 class="section-h2">Reach <span>Nathan directly</span></h2>' +
+      '<p class="body-text" style="max-width:480px;margin-bottom:24px">Call, text, or email anytime \u2014 happy to discuss what works best for ' + esc(f.schoolName) + '.</p>' +
+      '<div class="contact-grid">' +
+      '<div class="contact-item"><div class="contact-label">Owner</div><div class="contact-val">Nathan Bingle</div></div>' +
+      '<div class="contact-item"><div class="contact-label">Email</div><div class="contact-val">contact@nathanbinglephotography.com</div></div>' +
+      '<div class="contact-item"><div class="contact-label">Cell</div><div class="contact-val">704-558-6566</div></div>' +
+      '<div class="contact-item"><div class="contact-label">Website</div><div class="contact-val">nathanbinglephotography.com</div></div>' +
+      '<div class="contact-item"><div class="contact-label">Office</div><div class="contact-val">422 Crompton St, Charlotte, NC 28273</div></div>' +
+      '<div class="contact-item"><div class="contact-label">Member</div><div class="contact-val">Professional Photographers of America</div></div>' +
+      '</div>' +
+      '<div class="cta-box"><p class="cta-tagline">Ready to talk?</p>' +
+      '<p class="cta-sub" style="margin-top:4px">Call or text Nathan at <strong style="color:#fff">704-558-6566</strong> \u2014 or email <strong style="color:#fff">contact@nathanbinglephotography.com</strong></p></div>' +
+      '<div class="prop-footer"><div class="prop-footer-name">Nathan Bingle Photography</div>' +
+      '<div class="prop-footer-sub">Charlotte, NC \u00b7 Serving the Carolinas</div></div>' +
+      '</div></div></div>' +
+
+      '<script>function showTab(idx,btn){document.querySelectorAll(".tab-panel").forEach(function(p,i){p.classList.toggle("active",i===idx);});document.querySelectorAll(".tab-btn").forEach(function(b,i){b.classList.toggle("active",i===idx);});window.scrollTo(0,0);}function printProposal(){var panels=document.querySelectorAll(".tab-panel");var prev=[];panels.forEach(function(p){prev.push(p.classList.contains("active"));p.classList.add("active");});window.print();setTimeout(function(){panels.forEach(function(p,i){if(!prev[i])p.classList.remove("active");});},100);}<' + '/script>' +
+      '</body></html>';
+  }
+
+
+  /* ============================================================
+   * SPORTS CONTRACT TEMPLATE
+   * ============================================================ */
+  function buildSportsContractBody(f) {
+    var short = f.schoolShort || f.schoolName;
+    var leagueType = f.leagueType || "youth recreation league";
+    var sport = f.sport || "youth sports";
+    var season = f.season || "the upcoming season";
+    var estTeams = f.estTeams || "TBD";
+    var intro = "a " + leagueType + " offering " + sport + " programs" + (f.ageRange ? " for ages " + f.ageRange : "") + " in " + (f.cityState || "the Carolinas");
+
+    var scopeItems = "team portraits, individual portraits, custom banners";
+    if (f.includeTradingCards) scopeItems += ", trading cards";
+    if (f.includeAction) scopeItems += ", action photography";
+
+    return '<h1>Youth Sports Photography Agreement</h1>' +
+      '<p>This Photography Services Agreement ("Agreement") is entered into between <strong>' + esc(f.schoolName) + '</strong> ("League" or "' + esc(short) + '") and <strong>Nathan Bingle Photography</strong> ("Photographer" or "NBP").</p>' +
+      '<h2>1. Overview</h2><p>NBP is a high-volume photography company specializing in streamlined, professional photo experiences for youth sports organizations. Based in Charlotte, NC.</p>' +
+      '<p>This Agreement outlines the terms under which NBP will serve as the preferred provider of sports photography services for ' + esc(f.schoolName) + ', ' + esc(intro) + '.</p>' +
+      '<h2>2. Term &amp; Renewal</h2><p>This Agreement shall commence at the start of the ' + esc(season) + ' season and continue through the completion of that season (the "Initial Term"). This Agreement shall automatically renew for successive seasons unless either party provides written notice of non-renewal at least thirty (30) days prior to the start of the next season.</p>' +
+      '<h2>3. Scope of Services</h2><h3>3.1 Photo Day Services</h3><p>NBP agrees to provide professionally trained photographers, organized portrait sessions at ' + esc(short) + '\'s designated location(s), secure online ordering via GotPhoto, parent-facing customer service, and a dedicated communication contact.</p>' +
+      '<h3>3.2 Photography Offerings</h3><p>Services include: ' + scopeItems + '. Estimated team count: ' + esc(estTeams) + ' teams.</p>' +
+      '<h3>3.3 Image Delivery</h3><p>Following each session\'s sales window, NBP will provide ' + esc(short) + ' with web-resolution copies of team portraits for league use (website, social media, etc.).</p>' +
+      '<h2>4. Scheduling</h2><p>Photo days will be scheduled around the league\'s season calendar. Teams are scheduled in time blocks; coaches are responsible for ensuring their roster arrives during the assigned window.</p>' +
+      '<h2>5. Pricing &amp; Commission Structure</h2><h3>5.1 Standard Retail Pricing</h3><p>NBP\'s standard retail pricing is set forth in <strong>Exhibit A</strong>, structured with a 20% league commission share built in.</p>' +
+      '<h3>5.2 Flexible Commission Share</h3><p>' + esc(short) + ' may elect a commission rate between 10% and 50%, adjustable per season. Default is 20%.</p>' +
+      '<h3>5.3 Commission Calculation</h3><p>Commission = elected rate \u00d7 gross sales, less only state sales tax and shipping.</p>' +
+      '<h3>5.4 Commission Payment &amp; Reporting</h3><p>Commission is paid within 60 days of each season\'s gallery archive, with an itemized sales report.</p>' +
+      '<h2>6. Parent Experience</h2><p>Parents receive secure online ordering, direct-to-home shipping, multiple packages, and NBP-handled customer service. ' + esc(short) + ' is not responsible for order issues or refunds.</p>' +
+      '<h2>7. League Responsibilities</h2><p>' + esc(short) + ' agrees to provide reasonable photography space, team rosters, communication assistance using NBP templates, and schedule coordination at least 2 weeks before each photo day.</p>' +
+      '<h2>8. Image Rights, Privacy &amp; Data Handling</h2><p>NBP retains copyright. Marketing use requires signed parent release on file. Athlete data is used solely for this Agreement, never sold, and deleted/returned within 30 days of termination.</p>' +
+      '<h2>9. Insurance, Indemnification &amp; Safeguarding</h2><p><strong>Insurance:</strong> $2,000,000 commercial general liability; COI on request. <strong>Indemnification:</strong> Each party indemnifies the other for its own negligence. <strong>Background Checks:</strong> All NBP staff maintain current background checks.</p>' +
+      '<h2>10. Termination</h2><p>Either party may terminate for convenience upon 30 days\' written notice, or immediately for uncured material breach (15-day cure).</p>' +
+      '<h2>11. Liability &amp; Force Majeure</h2><p>NBP is not liable for delays caused by weather, illness, pandemic, or circumstances beyond reasonable control.</p>' +
+      '<h2>12. Independent Contractor</h2><p>NBP operates as an independent contractor. No employer-employee or partnership relationship is created.</p>' +
+      '<h2>13. Governing Law</h2><p>This Agreement shall be governed by the laws of the State of ' + esc(f.governingState) + '.</p>' +
+      '<h2>14. Entire Agreement</h2><p>This Agreement, together with Exhibit A, constitutes the entire understanding.</p>' +
+      '<hr style="margin:24px 0;border:none;border-top:1px solid #999;">' +
+      '<div style="margin-top:30px"><p><strong>' + esc(f.schoolName) + '</strong></p><p style="margin:14px 0">Signature: _______________________________________________</p><p style="margin:14px 0">Name &amp; Title: _______________________________________________</p><p style="margin:14px 0">Date: _______________________________________________</p></div>' +
+      '<div style="margin-top:30px"><p><strong>Nathan Bingle Photography</strong></p><p style="margin:14px 0">Signature: _______________________________________________</p><p style="margin:14px 0">Name &amp; Title: _______________________________________________</p><p style="margin:14px 0">Date: _______________________________________________</p></div>' +
+      '<div style="page-break-before:always"></div><h1>Exhibit A \u2014 Standard Retail Pricing</h1>' +
+      '<h3>Sports Packages</h3>' +
+      '<table style="border-collapse:collapse;width:100%;margin:8pt 0"><thead><tr><th style="border:1px solid #999;padding:6pt 8pt;background:#f2f2f2;text-align:left">Package</th><th style="border:1px solid #999;padding:6pt 8pt;background:#f2f2f2;text-align:left">Contents</th><th style="border:1px solid #999;padding:6pt 8pt;background:#f2f2f2;text-align:center">Retail at 20%</th></tr></thead><tbody>' +
+      '<tr><td style="border:1px solid #999;padding:6pt 8pt">MVP Package</td><td style="border:1px solid #999;padding:6pt 8pt">1 team photo, 2 poses (5\u00d77 + 3\u00d75 sheet), digital download</td><td style="border:1px solid #999;padding:6pt 8pt;text-align:center">$45</td></tr>' +
+      '<tr><td style="border:1px solid #999;padding:6pt 8pt">All-Star Package</td><td style="border:1px solid #999;padding:6pt 8pt">1 team photo, 3 poses (8\u00d710, 5\u00d77, wallet sheet), digital download, trading cards</td><td style="border:1px solid #999;padding:6pt 8pt;text-align:center">$65</td></tr>' +
+      '<tr><td style="border:1px solid #999;padding:6pt 8pt">Champion Package</td><td style="border:1px solid #999;padding:6pt 8pt">1 team photo, 4 poses (8\u00d710, 2 5\u00d77s, wallet sheet, magnet), digital download, trading cards, banner</td><td style="border:1px solid #999;padding:6pt 8pt;text-align:center">$85</td></tr>' +
+      '<tr><td style="border:1px solid #999;padding:6pt 8pt">Banner Only</td><td style="border:1px solid #999;padding:6pt 8pt">Custom 2\u00d76 athletic banner</td><td style="border:1px solid #999;padding:6pt 8pt;text-align:center">$55</td></tr>' +
+      '<tr><td style="border:1px solid #999;padding:6pt 8pt">Banner Upgrade</td><td style="border:1px solid #999;padding:6pt 8pt">Custom 3\u00d75 premium banner</td><td style="border:1px solid #999;padding:6pt 8pt;text-align:center">$75</td></tr>' +
+      (f.includeAction ? '<tr><td style="border:1px solid #999;padding:6pt 8pt">Action Photo Pack</td><td style="border:1px solid #999;padding:6pt 8pt">10 digital action shots from game day</td><td style="border:1px solid #999;padding:6pt 8pt;text-align:center">$35</td></tr>' : '') +
+      '<tr><td style="border:1px solid #999;padding:6pt 8pt">Digital Only</td><td style="border:1px solid #999;padding:6pt 8pt">All poses as high-res digital downloads</td><td style="border:1px solid #999;padding:6pt 8pt;text-align:center">$25</td></tr>' +
+      '</tbody></table>';
+  }
+
+  function buildSportsContractDoc(f) {
+    return '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>' + esc(f.schoolName) + ' Photography Agreement</title><style>body{font-family:Arial,sans-serif;font-size:11pt;line-height:1.5;color:#000;max-width:6.5in;margin:1in auto;}h1{font-size:20pt;text-align:center;margin-bottom:0.3in;}h2{font-size:14pt;margin-top:20pt;margin-bottom:8pt;}h3{font-size:12pt;margin-top:14pt;margin-bottom:6pt;}p{margin:6pt 0;}ul{margin:4pt 0;padding-left:24pt;}li{margin:3pt 0;}</style></head><body>' + buildSportsContractBody(f) + '</body></html>';
+  }
+
+
+  /* ============================================================
+   * SPORTS BANNER PROMO TEMPLATE
+   * ============================================================ */
+  function buildSportsBannerPromoHtml(f) {
+    var short = f.schoolShort || f.schoolName;
+    var mascot = f.mascot || short;
+    var sport = f.sport || "Youth Sports";
+
+    return "<!DOCTYPE html><html lang=\"en\"><head>"
+      + "<meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\">"
+      + "<title>" + esc(short) + " \u2014 Banner Program</title>"
+      + "<link href=\"https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600;700&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap\" rel=\"stylesheet\">"
+      + "<style>" + bannerPromoStyles(f) + "</style>"
+      + "</head><body>"
+      + "<header class=\"site-header\"><div><div class=\"nbp-mark\">Nathan Bingle</div><div class=\"nbp-sub\">Photography</div></div>"
+      + "<div class=\"header-right\">" + esc(short) + " \u00b7 Banner Program Proposal</div></header>"
+      + "<div class=\"hero-block\"><div class=\"hero-wm\">" + esc((mascot || '').toUpperCase()) + "</div>"
+      + "<div class=\"hero-inner\"><div class=\"hero-kicker\">Athletic Banner Program</div>"
+      + "<h1 class=\"hero-title\">" + esc(f.schoolName || short) + "</h1>"
+      + "<div class=\"hero-sub\">" + esc(sport) + (f.ageRange ? " \u00b7 Ages " + esc(f.ageRange) : "") + (f.cityState ? " \u00b7 " + esc(f.cityState) : "") + "</div>"
+      + "<div class=\"hero-pills\"><div class=\"hero-pill\">" + esc(f.season || "2026") + " Season</div><div class=\"hero-pill\">Zero league cost</div><div class=\"hero-pill\">Local photographer</div></div>"
+      + "</div><div class=\"hero-bar\"></div></div>"
+      + "<div class=\"page page-with-hero\">"
+      + "<div class=\"section\" style=\"margin-bottom:36px\">"
+      + "<p class=\"lede\">I\u2019m Nathan Bingle, a Fort Mill\u2013based photographer. We photograph the majority of rec league youth sports across Fort Mill and Lancaster County. Our banner program delivers premium athletic banners to every team in your league \u2014 with pricing that makes sense for a youth sports organization.</p>"
+      + "</div>"
+      + "<div class=\"section\">"
+      + "<div class=\"tag\">Banner Pricing</div>"
+      + "<h2 class=\"h2\">Simple pricing. Premium product.</h2>"
+      + "<div class=\"tier-grid\">"
+      + "<div class=\"tier lead\"><div class=\"tier-h\">2\u00d76 Banner</div><div class=\"tier-price\">$55</div><div class=\"tier-desc\">Standard athletic banner. Individual athlete portrait with team colors and league branding.</div></div>"
+      + "<div class=\"tier\"><div class=\"tier-h\">3\u00d75 Banner</div><div class=\"tier-price\">$75</div><div class=\"tier-desc\">Premium large-format banner. Ideal for gyms, fields, and end-of-season awards.</div></div>"
+      + "<div class=\"tier\"><div class=\"tier-h\">Team Banner</div><div class=\"tier-price\">$85</div><div class=\"tier-desc\">Full team photo banner for dugouts, sidelines, or team parent walls.</div></div>"
+      + "</div></div>"
+      + "<div class=\"section\">"
+      + "<div class=\"tag\">What " + esc(short) + " Gets</div>"
+      + "<h2 class=\"h2\">More than just banners.</h2>"
+      + "<p class=\"body\">The banner pricing above is part of a full sports photography partnership. Beyond banners, you get team photos, individual athlete portraits, custom composites, online ordering shipped directly to families, and zero administrative burden on your league office.</p>"
+      + "<div class=\"pillars\">"
+      + "<div class=\"pillar\"><div class=\"pillar-h\">Zero League Cost</div><div class=\"pillar-t\">No fees, no minimums, no upfront spend. Parents pay only if they choose to buy.</div></div>"
+      + "<div class=\"pillar\"><div class=\"pillar-h\">Local &amp; 10 Min Away</div><div class=\"pillar-t\">Fort Mill\u2013based. If something needs reshooting, I\u2019m not a regional rep three states away.</div></div>"
+      + "<div class=\"pillar\"><div class=\"pillar-h\">Background-Checked</div><div class=\"pillar-t\">All staff cleared. $2M commercial liability coverage.</div></div>"
+      + "<div class=\"pillar\"><div class=\"pillar-h\">Revenue Share</div><div class=\"pillar-t\">Your league earns commission on every package sold \u2014 10% to 50%, your choice.</div></div>"
+      + "</div></div>"
+      + "<div class=\"cta\">"
+      + "<div class=\"cta-h\">Next Step</div>"
+      + "<div class=\"cta-t\">Want the full details? Let\u2019s talk.</div>"
+      + "<p class=\"cta-b\">Call or text <strong>704-558-6566</strong> \u00b7 email <a href=\"mailto:nathan@nathanbinglephotography.com\">nathan@nathanbinglephotography.com</a><br>I\u2019m happy to meet with " + esc(short) + "\u2019s board or hop on a quick call \u2014 whichever works.</p>"
+      + "</div>"
+      + "<div class=\"sig\"><strong>Nathan Bingle</strong><br>Owner, Nathan Bingle Photography<br>nathanbinglephotography.com</div>"
+      + "</div></body></html>";
+  }
+
+
+  /* ============================================================
+   * SPORTS LEAGUE BRIEFING TEMPLATE (replaces AD Briefing)
+   * ============================================================ */
+  function buildSportsLeagueBriefingHtml(f) {
+    var short = f.schoolShort || f.schoolName;
+    var mascot = f.mascot || short;
+    var sport = f.sport || "Youth Sports";
+
+    return "<!DOCTYPE html><html lang=\"en\"><head>"
+      + "<meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\">"
+      + "<title>" + esc(short) + " \u2014 League Director Briefing</title>"
+      + "<link href=\"https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600;700&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap\" rel=\"stylesheet\">"
+      + "<style>" + adBriefingStyles(f) + "</style>"
+      + "</head><body>"
+      + "<div class=\"page\">"
+      + "<div class=\"masthead\"><div class=\"wordmark\">Nathan Bingle Photography</div>"
+      + (f.logoDataUrl ? "<div class=\"school-logo\"><img src=\"" + f.logoDataUrl + "\" alt=\"" + esc(short) + " logo\"></div>" : "")
+      + "<div class=\"meta\"><strong>" + esc(short) + "</strong><br>League Director Briefing</div></div>"
+      + "<div class=\"hero\">"
+      + "<div class=\"kicker\">For the " + esc(short) + " Leadership Team</div>"
+      + "<h1 class=\"h1\">A complete photo program for " + esc(short) + " \u2014 with a revenue share <span class=\"accent\">that goes straight back to your league.</span></h1>"
+      + "<p class=\"lede\">I\u2019m Nathan Bingle, a Fort Mill\u2013based photographer. We photograph the majority of rec league youth sports across Fort Mill and Lancaster County. This briefing covers what a league director actually needs from a photo partner: <strong>quality families trust</strong>, a process that puts no extra work on your volunteers, and a program that delivers team photos, individual portraits, banners, and digital downloads \u2014 all under one roof.</p>"
+      + "</div>"
+      + "<div class=\"section\">"
+      + "<div class=\"tag\">The Value Prop</div>"
+      + "<h2 class=\"h2\">Why youth sports organizations partner with us.</h2>"
+      + "<p class=\"body\">When your league partners with a professional photography company, you get consistent quality across every team, zero volunteer burden on photo day, a revenue stream from package sales, and a parent experience that\u2019s frictionless \u2014 no envelopes, no cash, no chasing coaches for orders.</p>"
+      + "<div class=\"pillars\">"
+      + "<div class=\"pillar\"><div class=\"pillar-h\">Professional Quality</div><div class=\"pillar-t\">Studio-quality portraits on location. Every athlete looks their best, every team photo is consistent.</div></div>"
+      + "<div class=\"pillar\"><div class=\"pillar-h\">Zero Volunteer Burden</div><div class=\"pillar-t\">We run photo day from setup to teardown. Your team parents and coaches don\u2019t lift a finger beyond getting athletes there on time.</div></div>"
+      + "<div class=\"pillar\"><div class=\"pillar-h\">Revenue Stream</div><div class=\"pillar-t\">Flexible commission: 10\u201350% of every dollar spent flows back to " + esc(short) + ". Your choice, adjustable each season.</div></div>"
+      + "<div class=\"pillar\"><div class=\"pillar-h\">Local &amp; Accountable</div><div class=\"pillar-t\">Based in Fort Mill. Not a national franchise. If something needs fixing, I\u2019m 10 minutes away.</div></div>"
+      + "</div></div>"
+      + "<div class=\"section\">"
+      + "<div class=\"tag\">How It Works</div>"
+      + "<h2 class=\"h2\">Photo day runs itself.</h2>"
+      + "<p class=\"body\">Teams are scheduled in time blocks. Coaches bring their roster. Athletes move through in 3\u20135 minutes. Online galleries go live within 48 hours. Parents order from home. We handle fulfillment, shipping, and customer service.</p>"
+      + "<p class=\"body\"><strong>What your league provides:</strong> team rosters, a location/date, and communication to families. That\u2019s it.</p>"
+      + "</div>"
+      + "<div class=\"section\">"
+      + "<div class=\"tag\">FAQ</div>"
+      + "<h2 class=\"h2\">Questions league directors ask.</h2>"
+      + "<div class=\"faq-item\"><div class=\"faq-q\">What\u2019s the actual workload for our board/volunteers?</div><div class=\"faq-a\">Provide rosters, send the photo day communication to families (we give you templates), and point us at a space. Total volunteer time: under 2 hours per season.</div></div>"
+      + "<div class=\"faq-item\"><div class=\"faq-q\">Is the league on the hook for any cost?</div><div class=\"faq-a\">No. There\u2019s no fee, retainer, or minimum. Parents pay only for photos they choose to order. The league is never invoiced.</div></div>"
+      + "<div class=\"faq-item\"><div class=\"faq-q\">What about athlete data?</div><div class=\"faq-a\">Roster data is used solely for photo day logistics and gallery setup. We never sell or share it. All data is deleted within 30 days of the season ending.</div></div>"
+      + "<div class=\"faq-item\"><div class=\"faq-q\">Can we use photos for our website and social media?</div><div class=\"faq-a\">Absolutely. We provide web-resolution team photos for league use at no charge.</div></div>"
+      + "<div class=\"faq-item\"><div class=\"faq-q\">Background checks?</div><div class=\"faq-a\">Every photographer on-site maintains current background checks. $2M commercial liability insurance. COI available on request.</div></div>"
+      + "</div>"
+      + "<div class=\"cta\">"
+      + "<div class=\"cta-h\">Next Step</div>"
+      + "<div class=\"cta-t\">15 minutes is all I\u2019m asking for.</div>"
+      + "<p class=\"cta-b\">Call or text <strong>704-558-6566</strong> \u00b7 email <a href=\"mailto:nathan@nathanbinglephotography.com\">nathan@nathanbinglephotography.com</a><br>Happy to meet with " + esc(short) + "\u2019s board or hop on a quick call.</p>"
+      + "</div>"
+      + "<div class=\"sig\"><strong>Nathan Bingle</strong><br>Owner, Nathan Bingle Photography<br>Member, Professional Photographers of America \u00b7 nathanbinglephotography.com</div>"
+      + "</div></body></html>";
+  }
+
+
+    /* ================== GITHUB PUBLISH ================== */
   async function publishProposal(filename, htmlContent) {
     var res = await fetch(API_BASE + "/publish", {
       method: "POST",
@@ -1667,14 +2139,26 @@
     }
 
     var src;
-    if (previewMode === "proposal") {
-      src = buildProposalHtml(f);
-    } else if (previewMode === "banner") {
-      src = buildBannerPromoHtml(f);
-    } else if (previewMode === "ad") {
-      src = buildAdBriefingHtml(f);
+    if (state.mode === 'sports') {
+      if (previewMode === "proposal") {
+        src = buildSportsProposalHtml(f);
+      } else if (previewMode === "banner") {
+        src = buildSportsBannerPromoHtml(f);
+      } else if (previewMode === "ad") {
+        src = buildSportsLeagueBriefingHtml(f);
+      } else {
+        src = '<html><body style="font-family:Arial;padding:40px;max-width:720px;margin:0 auto;color:#000;">' + buildSportsContractBody(f) + '</body></html>';
+      }
     } else {
-      src = '<html><body style="font-family:Arial;padding:40px;max-width:720px;margin:0 auto;color:#000;">' + buildContractBody(f) + '</body></html>';
+      if (previewMode === "proposal") {
+        src = buildProposalHtml(f);
+      } else if (previewMode === "banner") {
+        src = buildBannerPromoHtml(f);
+      } else if (previewMode === "ad") {
+        src = buildAdBriefingHtml(f);
+      } else {
+        src = '<html><body style="font-family:Arial;padding:40px;max-width:720px;margin:0 auto;color:#000;">' + buildContractBody(f) + '</body></html>';
+      }
     }
 
     var iframe = frame.querySelector("iframe");
@@ -1762,12 +2246,22 @@
     var f = readForm();
     if (!f.schoolName || !f.schoolShort) { setStatus("Complete the school info first.", "error"); return; }
     var html, suffix;
-    if (previewMode === "banner") {
-      html = buildBannerPromoHtml(f); suffix = "_BannerPromo.html";
-    } else if (previewMode === "ad") {
-      html = buildAdBriefingHtml(f); suffix = "_AD_Briefing.html";
+    if (state.mode === 'sports') {
+      if (previewMode === "banner") {
+        html = buildSportsBannerPromoHtml(f); suffix = "_BannerPromo.html";
+      } else if (previewMode === "ad") {
+        html = buildSportsLeagueBriefingHtml(f); suffix = "_LeagueBriefing.html";
+      } else {
+        html = buildSportsProposalHtml(f); suffix = "_Proposal.html";
+      }
     } else {
-      html = buildProposalHtml(f); suffix = "_Proposal.html";
+      if (previewMode === "banner") {
+        html = buildBannerPromoHtml(f); suffix = "_BannerPromo.html";
+      } else if (previewMode === "ad") {
+        html = buildAdBriefingHtml(f); suffix = "_AD_Briefing.html";
+      } else {
+        html = buildProposalHtml(f); suffix = "_Proposal.html";
+      }
     }
     downloadFile(fileName(f.schoolName) + suffix, html, "text/html");
     setStatus("✓ Downloaded " + fileName(f.schoolName) + suffix, "success");
@@ -1776,7 +2270,8 @@
   $("btn-contract").addEventListener("click", function() {
     var f = readForm();
     if (!f.schoolName || !f.schoolShort) { setStatus("Complete the school info first.", "error"); return; }
-    downloadFile(fileName(f.schoolName) + "_Agreement.doc", buildContractDoc(f), "application/msword");
+    var contractHtml = (state.mode === 'sports') ? buildSportsContractDoc(f) : buildContractDoc(f);
+    downloadFile(fileName(f.schoolName) + "_Agreement.doc", contractHtml, "application/msword");
     setStatus("✓ Downloaded " + fileName(f.schoolName) + "_Agreement.doc", "success");
   });
 
@@ -1793,22 +2288,28 @@
     try {
       // Pick template + filename suffix based on the active preview tab
       var html, filenameSuffix, label;
-      if (previewMode === "banner") {
-        html = buildBannerPromoHtml(f);
-        filenameSuffix = "-banner";
-        label = "Banner Promo";
-      } else if (previewMode === "ad") {
-        html = buildAdBriefingHtml(f);
-        filenameSuffix = "-ad";
-        label = "AD Briefing";
-      } else if (previewMode === "contract") {
-        setStatus("Contracts can be downloaded but aren't published as a public link.", "error");
-        btn.disabled = false; btn.innerHTML = original;
-        return;
+      if (state.mode === 'sports') {
+        if (previewMode === "banner") {
+          html = buildSportsBannerPromoHtml(f); filenameSuffix = "-banner"; label = "Banner Promo";
+        } else if (previewMode === "ad") {
+          html = buildSportsLeagueBriefingHtml(f); filenameSuffix = "-briefing"; label = "League Briefing";
+        } else if (previewMode === "contract") {
+          setStatus("Contracts can be downloaded but aren't published as a public link.", "error");
+          btn.disabled = false; btn.innerHTML = original; return;
+        } else {
+          html = buildSportsProposalHtml(f); filenameSuffix = ""; label = "Proposal";
+        }
       } else {
-        html = buildProposalHtml(f);
-        filenameSuffix = "";
-        label = "Proposal";
+        if (previewMode === "banner") {
+          html = buildBannerPromoHtml(f); filenameSuffix = "-banner"; label = "Banner Promo";
+        } else if (previewMode === "ad") {
+          html = buildAdBriefingHtml(f); filenameSuffix = "-ad"; label = "AD Briefing";
+        } else if (previewMode === "contract") {
+          setStatus("Contracts can be downloaded but aren't published as a public link.", "error");
+          btn.disabled = false; btn.innerHTML = original; return;
+        } else {
+          html = buildProposalHtml(f); filenameSuffix = ""; label = "Proposal";
+        }
       }
       var filename = slugName(f.schoolName) + filenameSuffix + ".html";
       var result = await publishProposal(filename, html);
@@ -1839,9 +2340,37 @@
     var firstName = (contact.name || "").trim().split(/\s+/)[0] || "";
     var greeting = firstName ? "Hi " + firstName + "," : "Hi,";
 
+    var isSports = (state.mode === 'sports');
     var subject, body;
 
-    if (mode === "warm") {
+    if (isSports && mode === "warm") {
+      subject = short + " proposal — ready for you to review";
+      body =
+        greeting + "\n\n" +
+        "Great connecting with you — thanks for taking the time to walk through what " + short + " is looking for in a photography partner. As promised, here's the partnership proposal I put together:\n\n" +
+        url + "\n\n" +
+        "Everything we discussed is in there — program structure, packages, and our revenue-share model. When you're ready to move forward, just click \"Request Agreement\" on the page and I'll send the formal contract over for signature.\n\n" +
+        "Happy to jump on a call if anything needs clarifying.\n\n" +
+        "Talk soon,\n" +
+        "Nathan Bingle\n" +
+        "Nathan Bingle Photography\n" +
+        "contact@nathanbinglephotography.com\n" +
+        "704-558-6566";
+    } else if (isSports && mode === "cold") {
+      subject = "Photo partnership for " + short;
+      body =
+        greeting + "\n\n" +
+        "Nathan Bingle here from Nathan Bingle Photography — a high-volume youth sports photography company based in Fort Mill, SC. I wanted to reach out about " + short + "'s photo day program.\n\n" +
+        "We work with youth sports organizations across the Carolinas and shoot the majority of rec league sports in the Fort Mill and Lancaster County area. A few things that might matter: revenue-share partnerships (no upfront cost), online ordering so parents never deal with envelopes, fast turnaround, and professional-quality portraits every time.\n\n" +
+        "I put together a proposal specifically for " + short + ":\n\n" +
+        url + "\n\n" +
+        "Everything's on one page — program structure, packages, and our flexible commission model. Take a look when you have a minute, and let me know if a short call would be useful.\n\n" +
+        "Talk soon,\n" +
+        "Nathan Bingle\n" +
+        "Nathan Bingle Photography\n" +
+        "contact@nathanbinglephotography.com\n" +
+        "704-558-6566";
+    } else if (mode === "warm") {
       subject = short + " proposal — ready for you to review";
       body =
         greeting + "\n\n" +
@@ -1881,6 +2410,65 @@
 
   $("btn-email-cold").addEventListener("click", function() { composeEmail("cold"); });
   $("btn-email-warm").addEventListener("click", function() { composeEmail("warm"); });
+
+  // Mode toggle (School / Sports)
+  document.querySelectorAll(".nbp-mode-btn[data-modeswitch]").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      var newMode = btn.dataset.modeswitch;
+      state.mode = newMode;
+      document.querySelectorAll(".nbp-mode-btn[data-modeswitch]").forEach(function(b) {
+        b.classList.toggle("active", b.dataset.modeswitch === newMode);
+      });
+      var root = document.querySelector(".nbp-smart");
+      root.classList.toggle("sports-mode", newMode === "sports");
+      // Toggle visibility of school-only / sports-only elements
+      document.querySelectorAll(".school-only").forEach(function(el) {
+        el.style.display = (newMode === "school") ? (el.tagName === "SPAN" ? "inline" : "block") : "none";
+      });
+      document.querySelectorAll(".sports-only").forEach(function(el) {
+        el.style.display = (newMode === "sports") ? (el.tagName === "SPAN" ? "inline" : "block") : "none";
+      });
+      // Update placeholder
+      var nameInput = $("f-schoolName");
+      if (newMode === "sports") {
+        nameInput.placeholder = nameInput.dataset.sportsPh || "League or organization name";
+      } else {
+        nameInput.placeholder = nameInput.dataset.schoolPh || "Banks Trail Middle School";
+      }
+      // Swap contacts
+      if (newMode === "sports") {
+        state.contacts = state.sportsContacts;
+      } else {
+        // Restore school contacts from research or defaults
+        if (state.research && state.research.contacts) {
+          state.contacts = state.research.contacts.map(function(c){ return {role: c.role||"", name: c.name||"", email: c.email||""}; });
+        } else {
+          state.contacts = [
+            {role: "Principal", name: "", email: ""},
+            {role: "Assistant Principal", name: "", email: ""},
+            {role: "Athletic Director", name: "", email: ""},
+            {role: "Yearbook Coordinator", name: "", email: ""},
+            {role: "Secretary", name: "", email: ""}
+          ];
+        }
+      }
+      // Update preview tab labels for mode
+      var adTab = $("tab-ad-label");
+      if (adTab) adTab.textContent = (newMode === "sports") ? "League Briefing" : "AD Briefing";
+      state.selectedContactIdx = 0;
+      renderContacts();
+      updatePreview();
+    });
+  });
+
+  // Wire sports-specific inputs to updatePreview
+  ["f-sport","f-ageRange","f-season","f-estTeams","f-leagueType","f-includeAction","f-includeTradingCards"].forEach(function(id) {
+    var el = $(id);
+    if (el) {
+      el.addEventListener("input", updatePreview);
+      el.addEventListener("change", updatePreview);
+    }
+  });
 
   // Initial render
   updatePaletteDisplay();
