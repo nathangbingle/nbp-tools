@@ -301,6 +301,7 @@
     /* Research/AI fill row — buttons + input */
     .nbp-research-row { flex-direction: column; gap: 8px; }
     .nbp-research-row .nbp-input { width: 100%; }
+    .nbp-research-row .nbp-league-search-wrap { width: 100%; }
     .nbp-research-row .nbp-btn { width: 100%; }
 
     /* Contacts list — already has 540px reflow, ensure spacing on mobile */
@@ -348,6 +349,35 @@
   .sports-only { display: none; }
   .nbp-smart.sports-mode .sports-only { display: block; }
   .nbp-smart.sports-mode .school-only { display: none; }
+
+  /* League search dropdown */
+  .nbp-league-search-wrap { position: relative; flex: 1; }
+  .nbp-league-dropdown {
+    position: absolute; top: 100%; left: 0; right: 0; z-index: 200;
+    background: #fff; border: 1px solid #D8D4CC; border-top: none;
+    border-radius: 0 0 6px 6px; box-shadow: 0 6px 20px rgba(0,0,0,.1);
+    max-height: 340px; overflow-y: auto; display: none;
+  }
+  .nbp-league-dropdown.open { display: block; }
+  .nbp-league-item {
+    padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #F0EDE6;
+    transition: background .1s;
+  }
+  .nbp-league-item:last-child { border-bottom: none; }
+  .nbp-league-item:hover { background: #FFF9E8; }
+  .nbp-league-item-name {
+    font-weight: 600; font-size: 13px; color: #1a1a1a; margin-bottom: 2px;
+  }
+  .nbp-league-item-detail {
+    font-size: 11px; color: #888; letter-spacing: .02em;
+  }
+  .nbp-league-item-detail .nbp-ld-sport { color: #B59448; font-weight: 500; }
+  .nbp-league-web-link {
+    padding: 10px 14px; cursor: pointer; border-top: 1px solid #E8E4DC;
+    font-size: 12px; color: #B59448; font-weight: 600; text-align: center;
+    letter-spacing: .03em; transition: background .1s;
+  }
+  .nbp-league-web-link:hover { background: #FFF9E8; }
 </style>
 
 <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -374,10 +404,13 @@
       <div class="nbp-step" id="step-research">
         <div class="nbp-step-label"><span class="n">1</span><span class="school-only" style="display:inline">Research the school</span><span class="sports-only" style="display:none">Research the league</span></div>
         <div class="nbp-research-row">
-          <input type="text" class="nbp-input" id="f-schoolName" placeholder="Banks Trail Middle School" data-school-ph="Banks Trail Middle School" data-sports-ph="League or organization name" autocomplete="off">
+          <div class="nbp-league-search-wrap" id="league-search-wrap">
+            <input type="text" class="nbp-input" id="f-schoolName" placeholder="Banks Trail Middle School" data-school-ph="Banks Trail Middle School" data-sports-ph="Search leagues by name, sport, or city..." autocomplete="off">
+            <div class="nbp-league-dropdown" id="league-dropdown"></div>
+          </div>
           <button class="nbp-btn nbp-btn-primary" id="btn-research">Research ↗</button>
         </div>
-        <div class="nbp-tip" id="research-tip"><span class="school-only" style="display:inline">Just type the school name. AI fills in everything else.</span><span class="sports-only" style="display:none">Type the league name. AI will try to research it — or fill in manually.</span></div>
+        <div class="nbp-tip" id="research-tip"><span class="school-only" style="display:inline">Just type the school name. AI fills in everything else.</span><span class="sports-only" style="display:none">Type a league name to search the database, or use Research for a web lookup.</span></div>
       </div>
 
       <div class="nbp-step locked" id="step-review">
@@ -635,6 +668,147 @@
     { name: "Set of 8 Wallet Prints", price: "$24" }, { name: "Single Photo Download", price: "$35" },
     { name: '3" Pinback Button', price: "$12" }, { name: "3.5&times;5 Magnet Print", price: "$12" },
     { name: "Set of 2 Magnet Prints", price: "$13" }
+  ];
+
+  /* ================== LEAGUE DATABASE ================== */
+  var LEAGUE_DB = [
+    // ——— Recreation Departments ———
+    {name:"Fort Mill Parks & Recreation",cat:"Recreation Dept",sport:"Baseball, Softball, Soccer, Flag Football, Tackle Football, Volleyball, Basketball, Cheerleading, Tennis",city:"Fort Mill",state:"SC",url:"https://fortmillsc.gov/209/Youth-Sports",contact:"",notes:"Municipal rec program",type:"rec department program"},
+    {name:"Tega Cay Parks & Recreation",cat:"Recreation Dept",sport:"Baseball, Soccer, Flag Football, Softball",city:"Tega Cay",state:"SC",url:"https://www.tegacaysc.org/1662/Sports-Registration",contact:"803-548-3787",notes:"",type:"rec department program"},
+    {name:"Rock Hill Parks, Recreation & Tourism",cat:"Recreation Dept",sport:"Baseball, Softball, Football, Basketball, Volleyball, Soccer",city:"Rock Hill",state:"SC",url:"https://www.cityofrockhill.com/departments/parks-recreation-tourism/programs/athletic-leagues/youth-leagues",contact:"803-329-5672",notes:"",type:"rec department program"},
+    {name:"Clover Parks & Recreation",cat:"Recreation Dept",sport:"Baseball, Tee-ball, Softball, Soccer, Basketball",city:"Clover",state:"SC",url:"https://www.cloversc.org/pView.aspx?id=16966&catid=292",contact:"803-222-9493",notes:"",type:"rec department program"},
+    {name:"York Parks & Recreation",cat:"Recreation Dept",sport:"Baseball, Basketball, Flag Football, Football, Softball",city:"York",state:"SC",url:"https://www.yorksc.gov/recreation/page/programs-athletics",contact:"803-684-3742",notes:"",type:"rec department program"},
+    {name:"Lancaster County Parks & Recreation",cat:"Recreation Dept",sport:"Baseball, Soccer, Softball, Football",city:"Lancaster",state:"SC",url:"https://www.lancastercountysc.gov/334/Youth-Athletics",contact:"",notes:"",type:"rec department program"},
+    {name:"Lancaster Rec",cat:"Recreation Dept",sport:"Football, Basketball, Cheerleading, Soccer, Ball Hockey",city:"Lancaster",state:"SC",url:"https://lancasterrec.org/sports-and-fitness/youth-sports-and-dance/",contact:"",notes:"",type:"rec department program"},
+    {name:"Mecklenburg County Park & Recreation",cat:"Recreation Dept",sport:"Baseball, Basketball, Soccer, Flag Football, Track & Field",city:"Charlotte",state:"NC",url:"https://parkandrec.mecknc.gov/Activities/athletics",contact:"",notes:"Largest in area",type:"rec department program"},
+    {name:"City of Gastonia Parks & Recreation",cat:"Recreation Dept",sport:"Soccer, Baseball, Softball, Volleyball, Basketball",city:"Gastonia",state:"NC",url:"https://gastonianc.gov/athletic-programs/youth-sports.html",contact:"704-866-6836",notes:"",type:"rec department program"},
+    {name:"City of Concord Parks & Recreation",cat:"Recreation Dept",sport:"Baseball, Softball, Basketball, Soccer",city:"Concord",state:"NC",url:"https://concordnc.gov/departments/parks-recreation/athletics",contact:"704-920-5600",notes:"",type:"rec department program"},
+    {name:"City of Kannapolis Parks & Recreation",cat:"Recreation Dept",sport:"Baseball, Softball, Flag Football, Basketball, Soccer",city:"Kannapolis",state:"NC",url:"https://www.kannapolisnc.gov/youth-sports",contact:"",notes:"",type:"rec department program"},
+    {name:"Harrisburg Parks & Recreation",cat:"Recreation Dept",sport:"Basketball, Soccer",city:"Harrisburg",state:"NC",url:"https://www.harrisburgnc.gov/226/Youth-Sports",contact:"",notes:"",type:"rec department program"},
+    {name:"Cabarrus County Active Living & Parks",cat:"Recreation Dept",sport:"Various Youth Athletics",city:"Cabarrus County",state:"NC",url:"",contact:"",notes:"",type:"rec department program"},
+    {name:"Town of Mooresville Parks & Recreation",cat:"Recreation Dept",sport:"Baseball, Softball, Tee-ball, Basketball",city:"Mooresville",state:"NC",url:"",contact:"",notes:"",type:"rec department program"},
+    {name:"Statesville Recreation & Parks",cat:"Recreation Dept",sport:"Various Youth Leagues",city:"Statesville",state:"NC",url:"https://recreation.statesvillenc.net/youth-leagues/",contact:"",notes:"",type:"rec department program"},
+    {name:"Cornelius Parks & Recreation",cat:"Recreation Dept",sport:"Basketball, Baseball, Softball",city:"Cornelius",state:"NC",url:"",contact:"704-892-6031 x160",notes:"",type:"rec department program"},
+    {name:"Town of Davidson",cat:"Recreation Dept",sport:"Athletics Programs",city:"Davidson",state:"NC",url:"https://www.townofdavidson.org/387/Athletics",contact:"",notes:"",type:"rec department program"},
+    {name:"Town of Pineville Parks & Recreation",cat:"Recreation Dept",sport:"Soccer, Baseball, Softball, Tee-ball",city:"Pineville",state:"NC",url:"",contact:"704-889-2400",notes:"",type:"rec department program"},
+    {name:"City of Monroe Parks & Recreation",cat:"Recreation Dept",sport:"Soccer, Basketball, Flag Football, Tee-ball, Baseball, Softball, Track & Field, Tennis",city:"Monroe",state:"NC",url:"https://www.monroenc.org/200/Athletics",contact:"704-282-4663",notes:"",type:"rec department program"},
+    {name:"Town of Troutman Parks & Recreation",cat:"Recreation Dept",sport:"Soccer, Baseball",city:"Troutman",state:"NC",url:"",contact:"",notes:"",type:"rec department program"},
+    {name:"City of Belmont Parks & Recreation",cat:"Recreation Dept",sport:"Soccer, Baseball, Softball, Volleyball, Basketball, Tennis",city:"Belmont",state:"NC",url:"",contact:"",notes:"",type:"rec department program"},
+    {name:"Cramerton Parks & Recreation",cat:"Recreation Dept",sport:"Soccer, Softball, Volleyball",city:"Cramerton",state:"NC",url:"",contact:"",notes:"",type:"rec department program"},
+    // ——— Soccer ———
+    {name:"Charlotte Soccer Academy (CSA)",cat:"Soccer",sport:"Soccer",city:"Charlotte",state:"NC",url:"https://charlottesocceracademy.com/",contact:"",notes:"376 teams; sections in York County, Palisades/Lake Wylie, Matthews",type:"competitive club"},
+    {name:"Charlotte Independence Soccer Club",cat:"Soccer",sport:"Soccer",city:"Fort Mill / Cornelius",state:"SC/NC",url:"https://www.independencesoccer.club/",contact:"",notes:"~12,000 members",type:"competitive club"},
+    {name:"Queen City Mutiny FC",cat:"Soccer",sport:"Soccer",city:"Charlotte",state:"NC",url:"https://www.qcmutiny.com/",contact:"",notes:"MLS NEXT",type:"competitive club"},
+    {name:"Charlotte Eagles Soccer Club",cat:"Soccer",sport:"Soccer",city:"Charlotte",state:"NC",url:"https://www.charlotteeagles.com/",contact:"",notes:"Faith-based",type:"competitive club"},
+    {name:"Charlotte Rise FC",cat:"Soccer",sport:"Soccer",city:"South Charlotte",state:"NC",url:"https://www.risefcsoccer.com/",contact:"",notes:"Ballantyne/Rea Farms",type:"competitive club"},
+    {name:"Fort Mill United FC",cat:"Soccer",sport:"Soccer",city:"Fort Mill",state:"SC",url:"https://www.fortmillunitedfc.com/",contact:"",notes:"Serves Fort Mill, Tega Cay, Indian Land",type:"travel/select club"},
+    {name:"Land United FC",cat:"Soccer",sport:"Soccer",city:"Indian Land",state:"SC",url:"https://landunitedfc.com/",contact:"",notes:"",type:"travel/select club"},
+    {name:"AYSO Region 605",cat:"Soccer",sport:"Soccer",city:"Charlotte",state:"NC",url:"https://www.ayso605.com/",contact:"",notes:"North Charlotte, Concord, Huntersville, Harrisburg",type:"youth recreation league"},
+    {name:"Hope Soccer Ministries",cat:"Soccer",sport:"Soccer",city:"Pineville",state:"NC",url:"https://hopesoccerministries.com/",contact:"",notes:"Faith-based; ages 4-16",type:"church-based league"},
+    {name:"Union County Youth Soccer League",cat:"Soccer",sport:"Soccer",city:"Union County",state:"NC",url:"",contact:"",notes:"Member clubs: ITAA, MHAA, PASA, PRAA, WAA, WCWAA",type:"youth recreation league"},
+    {name:"Carolina FC",cat:"Soccer",sport:"Soccer",city:"Charlotte",state:"NC",url:"https://www.carolinafc.org/",contact:"",notes:"",type:"competitive club"},
+    {name:"Lancaster Area Rec Soccer League (LARS)",cat:"Soccer",sport:"Soccer",city:"Lancaster County",state:"SC",url:"",contact:"",notes:"18 regional youth soccer clubs",type:"youth recreation league"},
+    {name:"International Soccer Club",cat:"Soccer",sport:"Soccer",city:"Kannapolis",state:"NC",url:"",contact:"",notes:"Founded 2016",type:"competitive club"},
+    // ——— Baseball & Softball ———
+    {name:"Legacy Baseball SC",cat:"Baseball/Softball",sport:"Baseball",city:"Fort Mill",state:"SC",url:"https://www.legacybaseballsc.com/",contact:"",notes:"Indoor facility; 58+ college commits",type:"travel/select club"},
+    {name:"Carolina Challenge Baseball League",cat:"Baseball/Softball",sport:"Baseball",city:"Charlotte",state:"NC",url:"https://challengebaseball.com/",contact:"",notes:"Tournament league",type:"travel/select club"},
+    {name:"Carolina Vipers Baseball Academy",cat:"Baseball/Softball",sport:"Baseball",city:"Waxhaw",state:"NC",url:"https://www.carolinavipersbaseball.com/",contact:"",notes:"Non-profit",type:"travel/select club"},
+    {name:"NC Challengers Softball",cat:"Baseball/Softball",sport:"Fastpitch Softball",city:"Charlotte",state:"NC",url:"https://ncchallengers.org/",contact:"",notes:"14 teams",type:"travel/select club"},
+    {name:"Team NC Fastpitch",cat:"Baseball/Softball",sport:"Fastpitch Softball",city:"Charlotte",state:"NC",url:"https://www.teamncfastpitch.com/",contact:"",notes:"",type:"travel/select club"},
+    {name:"Carolina Elite Fastpitch",cat:"Baseball/Softball",sport:"Fastpitch Softball",city:"Charlotte",state:"NC/SC",url:"https://carolinaelitefastpitch.org/",contact:"",notes:"40+ teams; 500+ college commits",type:"travel/select club"},
+    {name:"Char-Meck Girls Softball",cat:"Baseball/Softball",sport:"Fastpitch Softball",city:"Charlotte",state:"NC",url:"https://www.charmecksoftball.org/",contact:"",notes:"Rec & competitive",type:"community athletic association"},
+    {name:"Lancaster Dixie Youth Baseball",cat:"Baseball/Softball",sport:"Baseball/Softball",city:"Lancaster",state:"SC",url:"",contact:"803-287-5785",notes:"",type:"youth recreation league"},
+    {name:"Tega Cay - Fort Mill Little League",cat:"Baseball/Softball",sport:"Baseball",city:"Tega Cay / Fort Mill",state:"SC",url:"",contact:"",notes:"Transitioning to Diamond Youth Baseball 2026",type:"youth recreation league"},
+    {name:"Lake Wylie Little League",cat:"Baseball/Softball",sport:"Baseball",city:"Lake Wylie",state:"SC",url:"",contact:"",notes:"15+ years",type:"youth recreation league"},
+    {name:"Lake Norman Little League",cat:"Baseball/Softball",sport:"Baseball",city:"Huntersville",state:"NC",url:"https://www.lknll.com/",contact:"",notes:"Serves Huntersville, Cornelius, Davidson",type:"youth recreation league"},
+    {name:"Davidson Youth Baseball Association",cat:"Baseball/Softball",sport:"Baseball",city:"Davidson",state:"NC",url:"https://www.davidsonyouthbaseball.com/",contact:"",notes:"Since 1952",type:"community athletic association"},
+    {name:"University City Little League",cat:"Baseball/Softball",sport:"Baseball",city:"Charlotte",state:"NC",url:"https://www.ucll.org/",contact:"",notes:"",type:"youth recreation league"},
+    {name:"University East Little League",cat:"Baseball/Softball",sport:"Baseball",city:"Charlotte",state:"NC",url:"",contact:"",notes:"East Charlotte, Harrisburg, Concord",type:"youth recreation league"},
+    {name:"Myers Park Trinity Little League",cat:"Baseball/Softball",sport:"Baseball & Softball",city:"Charlotte",state:"NC",url:"https://www.mptll.org/",contact:"",notes:"Ages 7-16",type:"youth recreation league"},
+    {name:"Lake Norman Babe Ruth League",cat:"Baseball/Softball",sport:"Baseball",city:"Lake Norman",state:"NC",url:"https://lknbaberuth.com/",contact:"",notes:"",type:"youth recreation league"},
+    // ——— Football ———
+    {name:"Carolina Reapers Pop Warner (FMAA)",cat:"Football",sport:"Tackle Football & Cheer",city:"Fort Mill",state:"SC",url:"",contact:"",notes:"Fort Mill Athletic Association; est. 2022",type:"community athletic association"},
+    {name:"Next Level Spartans",cat:"Football",sport:"Tackle Football",city:"Steele Creek / Tega Cay / Fort Mill",state:"NC/SC",url:"https://www.nlspartans.com/",contact:"",notes:"Ages 5-12",type:"competitive club"},
+    {name:"South Charlotte Patriots (Pop Warner)",cat:"Football",sport:"Tackle Football & Cheer",city:"South Charlotte",state:"NC",url:"https://www.southcharlotterec.org/",contact:"",notes:"",type:"community athletic association"},
+    {name:"Mallard Creek Chargers (Pop Warner)",cat:"Football",sport:"Tackle Football",city:"Charlotte",state:"NC",url:"",contact:"",notes:"Est. 2009; championship program",type:"community athletic association"},
+    {name:"Clover Area Pop Warner",cat:"Football",sport:"Tackle Football",city:"Clover",state:"SC",url:"",contact:"",notes:"Founded 2016",type:"community athletic association"},
+    {name:"Mooresville Youth Athletics (MYA)",cat:"Football",sport:"Flag & Tackle Football, Cheerleading",city:"Mooresville",state:"NC",url:"https://www.mooresvilleyouthathletics.org/",contact:"",notes:"Divisions 7U-12U",type:"community athletic association"},
+    // ——— Basketball ———
+    {name:"Yes I Can Basketball",cat:"Basketball",sport:"Basketball",city:"Charlotte / Rock Hill / Fort Mill",state:"NC/SC",url:"https://yesicanbasketball.com/",contact:"",notes:"Since 1997; year-round",type:"competitive club"},
+    {name:"Carolina Hoopfest Basketball",cat:"Basketball",sport:"Basketball",city:"Charlotte",state:"NC",url:"https://www.carolinahoopfest.com/",contact:"",notes:"Ages 5+; camps, clinics, travel teams",type:"competitive club"},
+    {name:"Pro Skills Basketball (AAU)",cat:"Basketball",sport:"Basketball",city:"Charlotte",state:"NC",url:"https://proskillsbasketball.com/charlotte/teams/",contact:"",notes:"AAU",type:"competitive club"},
+    {name:"Dream Big Basketball Academy",cat:"Basketball",sport:"Basketball",city:"Huntersville / Charlotte",state:"NC",url:"https://dreambigbasketball.com/",contact:"",notes:"AAU teams & training",type:"competitive club"},
+    {name:"AP3 Sports",cat:"Basketball",sport:"Basketball",city:"Rock Hill",state:"SC",url:"https://ap3sports.com/",contact:"info@ap3sports.com",notes:"Co-ed; ages 3-8",type:"youth recreation league"},
+    // ——— Lacrosse ———
+    {name:"Carolina Lacrosse Association (CLA)",cat:"Lacrosse",sport:"Lacrosse",city:"Charlotte / Fort Mill / Clover / Lake Norman",state:"NC/SC",url:"https://www.carolinalacrosseassociation.com/",contact:"",notes:"Since 2001; CLA South serves York County",type:"community athletic association"},
+    {name:"NC Rec Lacrosse (NCRLA)",cat:"Lacrosse",sport:"Lacrosse",city:"Fort Mill / Matthews / Mooresville / South Charlotte",state:"NC/SC",url:"https://ncreclacrosse.com/",contact:"",notes:"K-12; fall & spring",type:"youth recreation league"},
+    {name:"Team 91 Lacrosse - Charlotte",cat:"Lacrosse",sport:"Lacrosse",city:"Fort Mill / Charlotte",state:"SC/NC",url:"https://charlotte.team91lacrosse.com/",contact:"",notes:"Comporium Athletic Park",type:"competitive club"},
+    {name:"Ultimate Lacrosse Charlotte",cat:"Lacrosse",sport:"Lacrosse",city:"Charlotte",state:"NC",url:"https://ultimategoallacrosse.com/charlotte",contact:"",notes:"Premier program",type:"competitive club"},
+    {name:"Carolina Youth Lacrosse Club (CYLC)",cat:"Lacrosse",sport:"Lacrosse",city:"Charlotte",state:"NC",url:"https://www.cylclax.com/",contact:"",notes:"Grade-based divisions",type:"youth recreation league"},
+    {name:"SC Youth Lacrosse",cat:"Lacrosse",sport:"Lacrosse",city:"Fort Mill",state:"SC",url:"https://www.southcarolinayouthlacrosse.org/",contact:"",notes:"Grades K-8; boys & girls",type:"youth recreation league"},
+    // ——— Volleyball ———
+    {name:"Carolina Juniors Volleyball (CJV)",cat:"Volleyball",sport:"Volleyball",city:"Charlotte",state:"NC",url:"https://carolinajuniors.com/",contact:"",notes:"4,000+ members",type:"competitive club"},
+    {name:"SC War Eagles Volleyball Club",cat:"Volleyball",sport:"Volleyball",city:"Rock Hill / Fort Mill / Lake Wylie",state:"SC",url:"https://www.scwareaglesvolleyball.com/",contact:"",notes:"Ages 12-18; est. 2015",type:"competitive club"},
+    {name:"CLT Beach Volleyball",cat:"Volleyball",sport:"Beach Volleyball",city:"Fort Mill",state:"SC",url:"https://www.cltbeach.com/",contact:"",notes:"Year-round juniors",type:"competitive club"},
+    // ——— Swimming ———
+    {name:"SwimMAC Carolina",cat:"Swimming",sport:"Swimming",city:"Charlotte",state:"NC",url:"https://www.swimmaccarolina.org/",contact:"",notes:"Nationally ranked",type:"competitive club"},
+    {name:"Fort Mill YMCA Tiger Sharks",cat:"Swimming",sport:"Swimming",city:"Fort Mill",state:"SC",url:"",contact:"",notes:"Polar Bear Swim League",type:"YMCA program"},
+    {name:"RAYS Swim Team (YMCA Upper Palmetto)",cat:"Swimming",sport:"Swimming",city:"Fort Mill / Rock Hill",state:"SC",url:"",contact:"",notes:"",type:"YMCA program"},
+    {name:"Mecklenburg Swim Association (MSA)",cat:"Swimming",sport:"Swimming",city:"Charlotte",state:"NC",url:"https://msaswim.com/",contact:"",notes:"Multiple locations",type:"competitive club"},
+    {name:"Just Swim Charlotte",cat:"Swimming",sport:"Swimming",city:"South Charlotte",state:"NC",url:"https://justswimcharlotte.org/",contact:"",notes:"Since 2013; ages 4-18",type:"competitive club"},
+    // ——— Track & Field ———
+    {name:"Charlotte Heat Track Club",cat:"Track & Field",sport:"Track & Field",city:"Charlotte",state:"NC",url:"https://www.charlotteheattc.com/",contact:"",notes:"Top 10 nationally; no tryouts",type:"competitive club"},
+    {name:"Team Charlotte Premier Track",cat:"Track & Field",sport:"Track & Field",city:"Charlotte",state:"NC",url:"https://teamcharlottepremiertc.com/",contact:"",notes:"Ages 4-18",type:"competitive club"},
+    {name:"Carolina Blaze Track & Field",cat:"Track & Field",sport:"Track & Field",city:"SW Charlotte",state:"NC",url:"https://www.carolinablazetf.com/",contact:"",notes:"Ages 6-18",type:"competitive club"},
+    // ——— Wrestling ———
+    {name:"The Wrestling Mill",cat:"Wrestling",sport:"Wrestling",city:"Fort Mill",state:"SC",url:"https://thewrestlingmill.net/",contact:"",notes:"6th grade & under",type:"competitive club"},
+    {name:"C2X Wrestling",cat:"Wrestling",sport:"Wrestling",city:"Charlotte",state:"NC",url:"https://www.c2xacademy.com/c2x-wrestling",contact:"",notes:"",type:"competitive club"},
+    // ——— Hockey ———
+    {name:"Carolina Junior Hurricanes",cat:"Hockey",sport:"Ice Hockey",city:"Charlotte",state:"NC",url:"https://carolinajuniorhurricanes.org/",contact:"",notes:"Tier 1, 2, Dev; boys & girls",type:"competitive club"},
+    {name:"Queen City Royals",cat:"Hockey",sport:"Ice Hockey",city:"Charlotte",state:"NC",url:"https://www.queencityroyalshockey.com/",contact:"",notes:"Est. 2020",type:"competitive club"},
+    {name:"Charlotte Street Hockey League",cat:"Hockey",sport:"Street/Deck Hockey",city:"Charlotte / Huntersville",state:"NC",url:"https://www.charlottestreethockeyleague.org/",contact:"",notes:"Youth deck hockey",type:"youth recreation league"},
+    // ——— Field Hockey ———
+    {name:"Charlotte Ambush Field Hockey",cat:"Field Hockey",sport:"Field Hockey",city:"Charlotte",state:"NC",url:"https://www.charlotteambush.com/",contact:"",notes:"First rec league in Charlotte",type:"youth recreation league"},
+    {name:"Carolina Curse Field Hockey Academy",cat:"Field Hockey",sport:"Field Hockey",city:"Charlotte / Rock Hill / Fort Mill",state:"NC/SC",url:"",contact:"",notes:"Clinics in Ballantyne & Rock Hill/Fort Mill",type:"competitive club"},
+    // ——— Rugby ———
+    {name:"Charlotte Cardinals Rugby Club",cat:"Rugby",sport:"Rugby",city:"Charlotte",state:"NC",url:"https://www.charlottecardinalsrugby.com/",contact:"",notes:"Est. 2021; elementary-HS",type:"competitive club"},
+    {name:"Girls Rugby Inc - Charlotte",cat:"Rugby",sport:"Rugby",city:"Charlotte",state:"NC",url:"https://girlsrugby.org/charlotte/",contact:"",notes:"Grades 2-8; girls",type:"competitive club"},
+    // ——— Tennis ———
+    {name:"Charlotte Tennis NC Junior Academy",cat:"Tennis",sport:"Tennis",city:"Charlotte",state:"NC",url:"https://charlottetennisnc.com/youth-tennis-2/",contact:"",notes:"Year-round; beginner to advanced",type:"competitive club"},
+    {name:"Rock Hill Tennis Center",cat:"Tennis",sport:"Tennis",city:"Rock Hill",state:"SC",url:"",contact:"803-984-0714",notes:"Coach Julie Sawyer",type:"competitive club"},
+    // ——— Multi-Sport Associations ———
+    {name:"Steele Creek Athletic Association (SCAA)",cat:"Multi-Sport",sport:"Soccer, Softball, Baseball, Cheerleading, Flag & Tackle Football",city:"Charlotte",state:"NC",url:"https://www.scaasports.com/",contact:"",notes:"Since 1958; ages 3-16",type:"community athletic association"},
+    {name:"Matthews Athletic & Recreation Assoc. (MARA)",cat:"Multi-Sport",sport:"Baseball, Softball, Tackle & Flag Football, Cheerleading, Basketball",city:"Matthews",state:"NC",url:"https://www.marasports.org/",contact:"",notes:"Since 1956",type:"community athletic association"},
+    {name:"Mint Hill Athletic Association (MHAA)",cat:"Multi-Sport",sport:"Baseball, Basketball, Soccer, Softball",city:"Mint Hill",state:"NC",url:"https://www.mhaa.us/",contact:"",notes:"Since 1972; ages 3-18",type:"community athletic association"},
+    {name:"Wesley Chapel Weddington Athletic Assoc.",cat:"Multi-Sport",sport:"Basketball, Soccer",city:"Weddington",state:"NC",url:"https://wcwaa.org/",contact:"",notes:"Since 1982",type:"community athletic association"},
+    {name:"Waxhaw Athletic Association (WAA)",cat:"Multi-Sport",sport:"Multiple Sports",city:"Waxhaw",state:"NC",url:"https://www.wxwathletics.org/",contact:"",notes:"Since 1980",type:"community athletic association"},
+    {name:"Indian Trail Athletic Association (ITAA)",cat:"Multi-Sport",sport:"Soccer, Baseball, Softball, Basketball",city:"Indian Trail",state:"NC",url:"",contact:"",notes:"Most trusted in Union County",type:"community athletic association"},
+    {name:"Porter Ridge Athletic Association (PRAA)",cat:"Multi-Sport",sport:"Baseball, Softball, Soccer, Basketball",city:"Indian Trail / Stallings",state:"NC",url:"https://www.porterridgeaa.com/",contact:"",notes:"2,000+ families; ages 3-18",type:"community athletic association"},
+    {name:"Park Sharon Athletic Association (PSAA)",cat:"Multi-Sport",sport:"Basketball, Cheerleading, Baseball, Softball, Soccer",city:"Charlotte",state:"NC",url:"https://www.parksharonsports.com/",contact:"",notes:"Ages 3-18",type:"community athletic association"},
+    {name:"South Charlotte Recreation Association",cat:"Multi-Sport",sport:"Baseball, Softball, Football, Basketball, Cheerleading",city:"South Charlotte",state:"NC",url:"https://www.southcharlotterec.org/",contact:"",notes:"Olde Providence area",type:"community athletic association"},
+    {name:"Huntersville Youth Athletic Association (HYAA)",cat:"Multi-Sport",sport:"Baseball, Softball, Basketball, Flag Football",city:"Huntersville",state:"NC",url:"https://hyaasports.com/",contact:"",notes:"Premier Lake Norman org; ages 4.5-17",type:"community athletic association"},
+    {name:"Lake Wylie Athletic Association",cat:"Multi-Sport",sport:"Basketball, Cheerleading, Baseball",city:"Lake Wylie",state:"SC",url:"https://www.lwsports.org/",contact:"",notes:"15+ years",type:"community athletic association"},
+    {name:"Odell Recreation Sports Association",cat:"Multi-Sport",sport:"Baseball, Basketball, Cheerleading, Football, Soccer, Softball, Track & Field",city:"Concord",state:"NC",url:"https://www.odellrec.com/",contact:"",notes:"1,500+ children",type:"community athletic association"},
+    {name:"Pineville Community Athletic Assoc. (PCAA)",cat:"Multi-Sport",sport:"Fastpitch Softball, Baseball",city:"Pineville",state:"NC",url:"https://www.pcaasports.org/",contact:"",notes:"Girls ages 5-18",type:"community athletic association"},
+    {name:"Charlotte Youth Sports Program",cat:"Multi-Sport",sport:"Soccer, Baseball, Softball, Tee-ball",city:"Charlotte",state:"NC",url:"https://charlotteyouth.com/",contact:"",notes:"7601 The Plaza",type:"community athletic association"},
+    {name:"South Iredell Athletic Association (SIAA)",cat:"Multi-Sport",sport:"Baseball, Softball, Basketball, Volleyball, Tee-ball",city:"Mooresville",state:"NC",url:"https://www.siaasports.com/",contact:"",notes:"Since 1995",type:"community athletic association"},
+    {name:"Troutman Youth Athletic Association (TYAA)",cat:"Multi-Sport",sport:"Soccer, Baseball",city:"Troutman",state:"NC",url:"https://www.tyaasports.com/",contact:"",notes:"",type:"community athletic association"},
+    // ——— Multi-Sport Franchises ———
+    {name:"i9 Sports (York/Lancaster/Gaston)",cat:"Multi-Sport Franchise",sport:"Flag Football, Soccer, Basketball, Baseball, Tee-ball",city:"Fort Mill / Rock Hill",state:"SC/NC",url:"https://www.i9sports.com/",contact:"",notes:"Nation's largest; no tryouts",type:"multi-sport franchise"},
+    {name:"i9 Sports (South Mecklenburg)",cat:"Multi-Sport Franchise",sport:"Flag Football, Soccer, Basketball, Baseball, Tee-ball",city:"South Charlotte",state:"NC",url:"https://www.i9sports.com/",contact:"",notes:"",type:"multi-sport franchise"},
+    {name:"NZone Sports",cat:"Multi-Sport Franchise",sport:"Flag Football, Soccer, Cheerleading, Basketball, Tee-ball",city:"Huntersville",state:"NC",url:"https://nzonesports.com/huntersville/",contact:"704-313-8124",notes:"Ages 3-14",type:"multi-sport franchise"},
+    // ——— YMCA ———
+    {name:"YMCA of Upper Palmetto",cat:"YMCA",sport:"Basketball, Swim, Gymnastics, Martial Arts",city:"Fort Mill / Rock Hill / Indian Land",state:"SC",url:"https://ymcaup.org/",contact:"",notes:"12 locations",type:"YMCA program"},
+    {name:"YMCA of Greater Charlotte",cat:"YMCA",sport:"Multiple Sports",city:"Charlotte",state:"NC",url:"https://www.ymcacharlotte.org/sports",contact:"",notes:"14 centers, 27 pools",type:"YMCA program"},
+    {name:"Gaston County Family YMCA",cat:"YMCA",sport:"Soccer, Flag Football, Basketball, Gymnastics",city:"Gastonia / Belmont",state:"NC",url:"https://gastonymca.org/",contact:"",notes:"Warlick & Stowe Family YMCAs",type:"YMCA program"},
+    {name:"Lake Norman YMCA",cat:"YMCA",sport:"Baseball, Basketball, Gymnastics, Soccer, Swimming",city:"Cornelius",state:"NC",url:"",contact:"704-716-4400",notes:"",type:"YMCA program"},
+    // ——— Church-Based ———
+    {name:"Upward Sports (multiple churches)",cat:"Church-Based",sport:"Basketball, Cheerleading, Soccer, Flag Football, Baseball, Softball, Volleyball",city:"Various",state:"NC/SC",url:"https://play.upward.org/",contact:"",notes:"Search by location",type:"church-based league"},
+    {name:"Westside Church Upward Sports",cat:"Church-Based",sport:"Basketball & Cheerleading",city:"Charlotte (Steele Creek)",state:"NC",url:"https://www.wchurch.tv/upward",contact:"Kelli.Cox@wchurch.tv",notes:"K-6th grade",type:"church-based league"},
+    {name:"Hickory Grove Baptist Church (HG Sports)",cat:"Church-Based",sport:"Soccer, Basketball, Cheerleading, Baseball, Softball",city:"Charlotte",state:"NC",url:"https://www.hickorygrove.org/youth-sports/",contact:"",notes:"Ages 5-13; Harris & Mallard Creek",type:"church-based league"},
+    // ——— Cheer/Gymnastics ———
+    {name:"Charlotte Allstar Gymnastics & Cheerleading",cat:"Cheer/Gymnastics",sport:"Competitive Cheer & Gymnastics",city:"Charlotte",state:"NC",url:"https://www.charlotteallstars.net/",contact:"",notes:"",type:"competitive club"},
+    {name:"Carolina Flipz",cat:"Cheer/Gymnastics",sport:"Competitive Cheer",city:"Pineville",state:"NC",url:"https://www.carolinaflipz.com/",contact:"",notes:"",type:"competitive club"}
   ];
 
   /* ================== STATE ================== */
@@ -1008,6 +1182,116 @@
     $("f-logoUrl").value = "";
     setLogoStatus("Logo removed. Run research or paste a URL to set one.", "");
     renderLogoPreview();
+  }
+
+  /* ================== LEAGUE SEARCH ================== */
+  function searchLeagues(query) {
+    if (!query || query.length < 3) return [];
+    var words = query.toLowerCase().split(/\s+/).filter(function(w){ return w.length > 0; });
+    var results = [];
+    LEAGUE_DB.forEach(function(league, idx) {
+      var score = 0;
+      var nameLow = league.name.toLowerCase();
+      var sportLow = league.sport.toLowerCase();
+      var cityLow = league.city.toLowerCase();
+      var catLow = league.cat.toLowerCase();
+      var notesLow = (league.notes || "").toLowerCase();
+      var stateLow = league.state.toLowerCase();
+      words.forEach(function(w) {
+        if (nameLow.indexOf(w) > -1) score += 10;
+        if (sportLow.indexOf(w) > -1) score += 5;
+        if (cityLow.indexOf(w) > -1) score += 3;
+        if (stateLow.indexOf(w) > -1) score += 2;
+        if (catLow.indexOf(w) > -1) score += 2;
+        if (notesLow.indexOf(w) > -1) score += 2;
+      });
+      if (score >= 3) results.push({ idx: idx, score: score, league: league });
+    });
+    results.sort(function(a, b) { return b.score - a.score; });
+    return results.slice(0, 8);
+  }
+
+  function selectLeague(idx) {
+    var league = LEAGUE_DB[idx];
+    if (!league) return;
+
+    // Switch to sports mode if not already
+    if (state.mode !== 'sports') {
+      var sportsBtn = document.querySelector('.nbp-mode-btn[data-modeswitch="sports"]');
+      if (sportsBtn) sportsBtn.click();
+    }
+
+    // Populate fields
+    $("f-schoolName").value = league.name;
+    // Generate short name: use acronym from parentheses if available, else first word
+    var shortMatch = league.name.match(/\(([^)]+)\)/);
+    var shortName = shortMatch ? shortMatch[1] : league.name.split(/\s+/)[0];
+    $("f-schoolShort").value = shortName;
+    $("f-sport").value = league.sport;
+    $("f-cityState").value = league.city + ", " + league.state;
+    // Set league type dropdown
+    if (league.type) {
+      var typeOpt = Array.from($("f-leagueType").options).find(function(o){ return o.value === league.type; });
+      if (typeOpt) $("f-leagueType").value = league.type;
+    }
+
+    // Highlight AI-filled fields
+    ["f-schoolShort","f-sport","f-cityState"].forEach(function(id){
+      if ($(id).value) $(id).classList.add("ai-filled");
+    });
+
+    // Try to fetch logo from URL if available
+    if (league.url) {
+      // Use the league URL as a hint for logo — don't auto-fetch, just set the URL field
+      $("f-logoUrl").value = league.url;
+    }
+
+    // Unlock steps
+    markDone("step-research");
+    activateStep("step-review");
+    activateStep("step-extras");
+    activateStep("step-send");
+    $("research-tip").innerHTML = '<span class="sports-only" style="display:inline">Loaded from database. Review details and tweak anything that needs updating.</span><span class="school-only" style="display:none">Just type the school name. AI fills in everything else.</span>';
+
+    // Close dropdown
+    closeLeagueDropdown();
+    updatePreview();
+  }
+
+  function renderLeagueDropdown(results, query) {
+    var dd = $("league-dropdown");
+    if (!dd) return;
+    dd.innerHTML = "";
+    if (results.length > 0) {
+      results.forEach(function(r) {
+        var item = document.createElement("div");
+        item.className = "nbp-league-item";
+        item.setAttribute("data-idx", r.idx);
+        item.innerHTML = '<div class="nbp-league-item-name">' + esc(r.league.name) + '</div>' +
+          '<div class="nbp-league-item-detail"><span class="nbp-ld-sport">' + esc(r.league.sport) + '</span> &mdash; ' + esc(r.league.city) + ', ' + esc(r.league.state) + '</div>';
+        item.addEventListener("mousedown", function(e) {
+          e.preventDefault(); // prevent blur from firing first
+          selectLeague(r.idx);
+        });
+        dd.appendChild(item);
+      });
+    }
+    // Always show "not in database" link
+    var webLink = document.createElement("div");
+    webLink.className = "nbp-league-web-link";
+    webLink.textContent = results.length > 0 ? "Not in database — search web instead" : "No matches — search web instead";
+    webLink.addEventListener("mousedown", function(e) {
+      e.preventDefault();
+      closeLeagueDropdown();
+      doResearch();
+    });
+    dd.appendChild(webLink);
+    dd.classList.add("open");
+  }
+
+  function closeLeagueDropdown() {
+    var dd = $("league-dropdown");
+    if (dd) { dd.classList.remove("open"); dd.innerHTML = ""; }
   }
 
   /* ================== PROPOSAL HTML ================== */
@@ -2184,7 +2468,45 @@
     if (e.key === "Enter") { e.preventDefault(); $("btn-fetch-logo").click(); }
   });
   $("f-schoolName").addEventListener("keydown", function(e) {
-    if (e.key === "Enter") { e.preventDefault(); doResearch(); }
+    if (e.key === "Enter") {
+      e.preventDefault();
+      closeLeagueDropdown();
+      doResearch();
+    }
+    if (e.key === "Escape") {
+      closeLeagueDropdown();
+    }
+  });
+
+  // League search: show dropdown as user types in sports mode
+  $("f-schoolName").addEventListener("input", function() {
+    if (state.mode !== 'sports') { closeLeagueDropdown(); return; }
+    var query = $("f-schoolName").value.trim();
+    if (query.length < 3) { closeLeagueDropdown(); return; }
+    var results = searchLeagues(query);
+    renderLeagueDropdown(results, query);
+  });
+
+  // Close dropdown when clicking outside
+  document.addEventListener("click", function(e) {
+    var wrap = $("league-search-wrap");
+    if (wrap && !wrap.contains(e.target)) {
+      closeLeagueDropdown();
+    }
+  });
+
+  // Close dropdown on blur of the input (with delay so mousedown on items fires first)
+  $("f-schoolName").addEventListener("blur", function() {
+    setTimeout(closeLeagueDropdown, 200);
+  });
+
+  // Re-open dropdown on focus if there's enough text and we're in sports mode
+  $("f-schoolName").addEventListener("focus", function() {
+    if (state.mode !== 'sports') return;
+    var query = $("f-schoolName").value.trim();
+    if (query.length < 3) return;
+    var results = searchLeagues(query);
+    if (results.length > 0) renderLeagueDropdown(results, query);
   });
 
   // Wire all review/extras inputs to update preview
