@@ -42,7 +42,7 @@
   // ============================================================
   // PASSWORD GATE BYPASS — set BYPASS = false to re-enable the gate
   // ============================================================
-  var BYPASS = true;
+  var BYPASS = false;
   if (BYPASS) {
     try { sessionStorage.setItem('nbp_auth', '1'); } catch(e) {}
     window.location.replace('tool.html');
