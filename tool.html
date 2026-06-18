@@ -1038,7 +1038,7 @@
     });
 
     // School colors
-    var hasColors = r.primaryColor && r.accentColor && r.colorsConfidence !== "low";
+    var hasColors = r.primaryColor && r.accentColor;
     if (hasColors) {
       state.aiPrimary = r.primaryColor;
       state.aiAccent  = r.accentColor;
