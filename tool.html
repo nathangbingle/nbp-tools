@@ -410,7 +410,10 @@
           </div>
           <button class="nbp-btn nbp-btn-primary" id="btn-research">Research ↗</button>
         </div>
-        <div class="nbp-tip" id="research-tip"><span class="school-only" style="display:inline">Just type the school name. AI fills in everything else.</span><span class="sports-only" style="display:none">Type a league name to search the database, or use Research for a web lookup.</span></div>
+        <div class="nbp-research-row school-only" style="margin-top: 8px; display:flex;">
+          <input type="text" class="nbp-input" id="f-researchCity" placeholder="City, ST  (e.g. Fort Mill, SC) — optional but helps when name is common" autocomplete="off" style="flex:1;">
+        </div>
+        <div class="nbp-tip" id="research-tip"><span class="school-only" style="display:inline">Just type the school name. Adding city/state helps when the name is common.</span><span class="sports-only" style="display:none">Type a league name to search the database, or use Research for a web lookup.</span></div>
       </div>
 
       <div class="nbp-step locked" id="step-review">
@@ -972,6 +975,7 @@
   /* ================== RESEARCH ================== */
   async function doResearch() {
     var schoolName = $("f-schoolName").value.trim();
+    var researchCity = ($("f-researchCity") && $("f-researchCity").value || "").trim();
     if (!schoolName) {
       setStatus("Enter a school name first.", "error");
       return;
@@ -988,7 +992,7 @@
       var res = await fetch(API_BASE + "/research", {
         method: "POST",
         headers: { "Content-Type": "application/json", "X-NBP-Key": TOOL_SECRET },
-        body: JSON.stringify({ schoolName: schoolName })
+        body: JSON.stringify({ schoolName: schoolName, cityState: researchCity })
       });
       if (!res.ok) {
         var err = await res.json().catch(function(){ return { error: "HTTP " + res.status }; });
