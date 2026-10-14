@@ -601,6 +601,8 @@
           <button class="nbp-btn nbp-btn-secondary" id="btn-contract">⬇ Download contract</button>
           <button class="nbp-btn nbp-btn-email" id="btn-email-cold">✉ Cold intro email</button>
           <button class="nbp-btn nbp-btn-email" id="btn-email-warm">✉ Warm follow-up</button>
+          <button class="nbp-btn nbp-btn-email" id="btn-email-banner">✉ Free banner program</button>
+          <button class="nbp-btn nbp-btn-email" id="btn-email-banner-warm">✉ Banner follow-up</button>
         </div>
         <div class="nbp-status" id="status"></div>
       </div>
@@ -1485,7 +1487,7 @@
     var short = f.schoolShort || f.schoolName;
     var mascot = f.mascot || short;
     var isHS = (f.schoolType || '').toLowerCase().indexOf('high') > -1 || (f.gradeRange || '').match(/9|10|11|12/);
-    var fallLabel = isHS ? "Senior banners (fall sports)" : "8th-grade banners (fall sports)";
+    var fallLabel = isHS ? "Senior athletic banners" : "8th-grade athletic banners";
     var fallSub = isHS ? "Football, cheer, dance, volleyball &mdash; every fall sport" : "Football, cheer, volleyball &mdash; every fall sport";
     var sigBlurb = "Nathan Bingle &middot; Owner, Nathan Bingle Photography";
 
@@ -1505,15 +1507,15 @@
       + "</div><div class=\"hero-bar\"></div></div>"
       + "<div class=\"page page-with-hero\">"
       + "<div class=\"section\" style=\"margin-bottom:36px\">"
-      + "<p class=\"lede\">I'm Nathan Bingle, a Fort Mill&ndash;based photographer. We're the photography partner for Pleasant Knoll Middle School and shoot the majority of rec league youth sports across Fort Mill and Lancaster County. I just rolled out a banner program that will save your booster real money &mdash; here's how.</p>"
+      + "<p class=\"lede\">I'm Nathan Bingle, a Fort Mill&ndash;based photographer. We're the photography partner for Pleasant Knoll Middle School and photograph the majority of rec league youth sports across Fort Mill and Lancaster County. I just rolled out a banner program that will save your booster real money &mdash; here's how.</p>"
       + "</div>"
       + "<div class=\"section\">"
       + "<div class=\"tag\">Banner Pricing</div>"
-      + "<h2 class=\"h2\">Three tiers. One simple promise.</h2>"
+      + "<h2 class=\"h2\">First season free. One simple promise.</h2>"
       + "<div class=\"tier-grid\">"
-      + "<div class=\"tier lead\"><div class=\"tier-h\">Fall</div><div class=\"tier-price\">$0</div><div class=\"tier-desc\"><strong>" + fallLabel + "</strong> are on us. " + fallSub + ". Your booster pays nothing.</div></div>"
-      + "<div class=\"tier\"><div class=\"tier-h\">Winter</div><div class=\"tier-price\">$10<span style=\"font-size:14px;color:#999;\">/ea</span></div><div class=\"tier-desc\">About half what most boosters in the area are paying right now.</div></div>"
-      + "<div class=\"tier\"><div class=\"tier-h\">Spring</div><div class=\"tier-price\">$10<span style=\"font-size:14px;color:#999;\">/ea</span></div><div class=\"tier-desc\">Same flat rate as winter. Predictable cost, no surprises.</div></div>"
+      + "<div class=\"tier lead\"><div class=\"tier-h\">Your First Season</div><div class=\"tier-price\">$0</div><div class=\"tier-desc\"><strong>" + fallLabel + "</strong> are on us for your first season with NBP &mdash; fall, winter, or spring, whichever you start with. Every sport, every athlete. Your booster pays nothing.</div></div>"
+      + "<div class=\"tier\"><div class=\"tier-h\">Every Season After</div><div class=\"tier-price\">$10<span style=\"font-size:14px;color:#999;\">/ea</span></div><div class=\"tier-desc\">One flat per-banner rate &mdash; about half what most boosters in the area are paying right now.</div></div>"
+      + "<div class=\"tier\"><div class=\"tier-h\">No Surprises</div><div class=\"tier-price\">&#10003;</div><div class=\"tier-desc\">Same rate every season, every sport. Predictable cost for the booster, zero cost to the school.</div></div>"
       + "</div></div>"
       + "<div class=\"section\">"
       + "<div class=\"tag\">What " + esc(short) + " Gets</div>"
@@ -1593,7 +1595,7 @@
     var short = f.schoolShort || f.schoolName;
     var mascot = f.mascot || short;
     var isHS = (f.schoolType || '').toLowerCase().indexOf('high') > -1 || (f.gradeRange || '').match(/9|10|11|12/);
-    var fallLabel = isHS ? "Senior banners (fall sports)" : "8th-grade banners (fall sports)";
+    var fallLabel = isHS ? "Senior athletic banners" : "8th-grade athletic banners";
     var fallSub = isHS ? "Football, cheer, dance, volleyball &mdash; every fall sport" : "Football, cheer, volleyball &mdash; every fall sport";
     var imgBase = "https://nathangbingle.github.io/nbp-school-proposals/images";
 
@@ -1610,16 +1612,16 @@
       + "<div class=\"hero\">"
       + "<div class=\"kicker\">For the " + esc(short) + " " + esc(mascot) + " Athletic Director</div>"
       + "<h1 class=\"h1\">A complete photo program for " + esc(short) + " athletics &mdash; with banner savings <span class=\"accent\">that go straight to your booster.</span></h1>"
-      + "<p class=\"lede\">I'm Nathan Bingle, a Fort Mill&ndash;based photographer. We're the photography partner for Pleasant Knoll Middle School and shoot the majority of rec league youth sports across Fort Mill and Lancaster County. This briefing is structured around what an AD actually needs from a photo partner: <strong>quality you don't have to babysit</strong>, a process that puts no extra work on your front office, and a program that delivers everything &mdash; team photos, individual portraits, banners, signing days, senior nights &mdash; under one roof.</p>"
+      + "<p class=\"lede\">I'm Nathan Bingle, a Fort Mill&ndash;based photographer. We're the photography partner for Pleasant Knoll Middle School and photograph the majority of rec league youth sports across Fort Mill and Lancaster County. This briefing is structured around what an AD actually needs from a photo partner: <strong>quality you don't have to babysit</strong>, a process that puts no extra work on your front office, and a program that delivers everything &mdash; team photos, individual portraits, banners, signing days, senior nights &mdash; under one roof.</p>"
       + "</div>"
       + "<div class=\"section\">"
       + "<div class=\"tag\">Banner Program</div>"
       + "<h2 class=\"h2\">Real money back to your booster.</h2>"
       + "<p class=\"body\">When the booster saves on banners, that money goes back into uniforms, equipment, travel, and end-of-season events. The banner program is the entry point &mdash; the photo program is what makes the whole partnership worth doing.</p>"
       + "<div class=\"tier-grid\">"
-      + "<div class=\"tier lead\"><div class=\"tier-h\">Fall</div><div class=\"tier-price\">$0</div><div class=\"tier-desc\"><strong>" + fallLabel + "</strong> are on us. " + fallSub + ". Your booster pays nothing.</div></div>"
-      + "<div class=\"tier\"><div class=\"tier-h\">Winter</div><div class=\"tier-price\">$10<span style=\"font-size:14px;color:#999;\">/ea</span></div><div class=\"tier-desc\">About half what most boosters in the area are paying right now.</div></div>"
-      + "<div class=\"tier\"><div class=\"tier-h\">Spring</div><div class=\"tier-price\">$10<span style=\"font-size:14px;color:#999;\">/ea</span></div><div class=\"tier-desc\">Same flat rate. Predictable cost, no surprises.</div></div>"
+      + "<div class=\"tier lead\"><div class=\"tier-h\">Your First Season</div><div class=\"tier-price\">$0</div><div class=\"tier-desc\"><strong>" + fallLabel + "</strong> are on us for your first season with NBP &mdash; fall, winter, or spring, whichever you start with. Every sport, every athlete. Your booster pays nothing.</div></div>"
+      + "<div class=\"tier\"><div class=\"tier-h\">Every Season After</div><div class=\"tier-price\">$10<span style=\"font-size:14px;color:#999;\">/ea</span></div><div class=\"tier-desc\">One flat per-banner rate &mdash; about half what most boosters in the area are paying right now.</div></div>"
+      + "<div class=\"tier\"><div class=\"tier-h\">No Surprises</div><div class=\"tier-price\">&#10003;</div><div class=\"tier-desc\">Same rate every season, every sport. Predictable cost for the booster, zero cost to the school.</div></div>"
       + "</div></div>"
       + "<div class=\"section\">"
       + "<div class=\"tag\">Local Proof</div>"
@@ -2650,6 +2652,73 @@
     }
   });
 
+
+  // Email: free banner program — cold pitch or follow-up. Links to the Banner Promo page
+  // (the "-banner" published page) rather than the main proposal.
+  function composeBannerEmail(mode) {
+    var f = readForm();
+    if (!f.schoolName || !f.schoolShort) { setStatus("Complete the school info first.", "error"); return; }
+    var baseUrl = (PAGES_BASE + "/" + slugName(f.schoolName) + ".html");
+    var url = (state.lastPublishedUrl && /-banner\.html$/i.test(state.lastPublishedUrl))
+      ? state.lastPublishedUrl
+      : baseUrl.replace(/\.html$/i, "-banner.html");
+    var short = f.schoolShort || f.schoolName;
+    var mascot = (f.mascot || "").trim();
+    var mascotPhrase = mascot ? "the " + mascot : short;
+    var isHS = (f.schoolType || "").toLowerCase().indexOf("high") > -1 || /\b(9|10|11|12)\b/.test(f.gradeRange || "");
+    var bannerKind = isHS ? "Senior athletic banners" : "8th-grade athletic banners";
+    var isSports = (state.mode === 'sports');
+
+    var contact = (state.contacts || [])[state.selectedContactIdx] || { name: "", email: "" };
+    var toAddr  = contact.email || "";
+    var firstName = (contact.name || "").trim().split(/\s+/)[0] || "";
+    var greeting = firstName ? "Hi " + firstName + "," : "Hi,";
+    var sig = "Talk soon,\nNathan Bingle\nNathan Bingle Photography\ncontact@nathanbinglephotography.com\n704-558-6566";
+
+    var subject, body;
+
+    if (isSports && mode === "warm") {
+      subject = short + " banner program — here's the page";
+      body =
+        greeting + "\n\n" +
+        "Good talking with you. Here's the banner program page I put together for " + short + ":\n\n" +
+        url + "\n\n" +
+        "Quick recap: premium athletic banners for every team in the league — individual athlete banners, team banners, and the large-format option — all ordered online by families, so nothing lands on your board or your volunteers. It runs alongside the full photo day program, so team photos, individual portraits, and banners all come from one partner.\n\n" +
+        "Share it with your board, and when you're ready, reply here and I'll get the agreement over.\n\n" + sig;
+    } else if (isSports) {
+      subject = "Athletic banners for " + mascotPhrase;
+      body =
+        greeting + "\n\n" +
+        "Nathan Bingle here from Nathan Bingle Photography — a high-volume youth sports photography company based in Fort Mill, SC. We photograph the majority of rec league youth sports across Fort Mill and Lancaster County, so there's a good chance " + short + " families already know our work.\n\n" +
+        "I wanted to put our banner program in front of you. Every athlete in " + short + " can get a premium custom banner — individual banners in team colors, full team banners for the dugout or sideline, and a large-format option — all ordered online by parents. Zero cost to the league, zero envelopes, zero work for your volunteers.\n\n" +
+        "Banners are the entry point. Behind them is a complete photo day program: team photos, individual portraits, composites, and online ordering shipped straight to families.\n\n" +
+        "Everything for " + short + " is on one page:\n\n" +
+        url + "\n\n" +
+        "If it's a fit, reply here or call/text and we'll get your season on the calendar.\n\n" + sig;
+    } else if (mode === "warm") {
+      subject = short + " banner program — here's the page";
+      body =
+        greeting + "\n\n" +
+        "Good talking with you. Here's the banner program page I put together for " + mascotPhrase + ":\n\n" +
+        url + "\n\n" +
+        "Quick recap: " + bannerKind.toLowerCase() + " for " + short + " are free for your first season with us — every sport, every athlete, no cost to the school or the booster. After that it's a flat per-banner rate that's about half what most boosters around here are paying. The banners ride on a full athletic photo program, so team photos, individual portraits, and banners all come from one local partner and nothing lands on your front office.\n\n" +
+        "Share it with your booster, and when you're ready to move forward, reply here and I'll get the agreement over.\n\n" + sig;
+    } else {
+      subject = "Free athletic banners for " + mascotPhrase;
+      body =
+        greeting + "\n\n" +
+        "Nathan Bingle here from Nathan Bingle Photography — a high-volume school and youth sports photography company based in Fort Mill, SC. We photograph a lot of the rec league teams your " + short + " families are on, and we just rolled out a banner program I think your booster will like.\n\n" +
+        bannerKind + " for " + short + " are free for your first season with us — every sport, every athlete, no cost to the school or the booster. After that it's a flat per-banner rate that's about half what most boosters around here are paying.\n\n" +
+        "Banners are the entry point. Behind them is a complete athletic photo program: team photos, individual portraits, composites, and online ordering shipped straight to families — with zero work landing on your front office.\n\n" +
+        "The details for " + short + " are on one page:\n\n" +
+        url + "\n\n" +
+        "If it's a fit, reply here or call/text and we'll get your first season on the calendar.\n\n" + sig;
+    }
+
+    var mailto = "mailto:" + encodeURIComponent(toAddr) + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+    window.location.href = mailto;
+  }
+
   // Email: open mailto with prefilled body — cold intro or warm follow-up
   function composeEmail(mode) {
     var f = readForm();
@@ -2736,6 +2805,8 @@
 
   $("btn-email-cold").addEventListener("click", function() { composeEmail("cold"); });
   $("btn-email-warm").addEventListener("click", function() { composeEmail("warm"); });
+  $("btn-email-banner").addEventListener("click", function() { composeBannerEmail("cold"); });
+  $("btn-email-banner-warm").addEventListener("click", function() { composeBannerEmail("warm"); });
 
   // Mode toggle (School / Sports)
   document.querySelectorAll(".nbp-mode-btn[data-modeswitch]").forEach(function(btn) {
