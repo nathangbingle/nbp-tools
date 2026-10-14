@@ -117,15 +117,15 @@
 
   /* Staff contacts panel */
   .nbp-contacts { display: flex; flex-direction: column; gap: 6px; }
-  .nbp-contact-row { display: grid; grid-template-columns: 130px 1fr 1.4fr 26px; gap: 6px; align-items: center; }
+  .nbp-contact-row { display: grid; grid-template-columns: 130px 1fr 1.4fr auto; gap: 6px; align-items: center; }
   .nbp-contact-row .nbp-input { padding: 7px 9px; font-size: 12px; }
   .nbp-contact-role { font-size: 11px; font-weight: 600; color: #555; padding: 0 4px; letter-spacing: .04em; }
-  .nbp-contact-use { background: none; border: 1px solid #D8D4CC; color: #888; width: 26px; height: 30px; border-radius: 4px; cursor: pointer; font-size: 14px; padding: 0; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+  .nbp-contact-use { background: none; border: 1px solid #D8D4CC; color: #666; min-width: 78px; height: 34px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; letter-spacing: .03em; padding: 0 10px; display: flex; align-items: center; justify-content: center; white-space: nowrap; transition: all .15s; -webkit-tap-highlight-color: transparent; }
   .nbp-contact-use:hover:not(:disabled) { border-color: #2C7A3E; color: #2C7A3E; background: #f4faf6; }
-  .nbp-contact-use:disabled { opacity: 0.3; cursor: not-allowed; }
+  .nbp-contact-use.no-email { border-style: dashed; color: #999; }
   .nbp-contact-use.is-default { background: #2C7A3E; color: #fff; border-color: #2C7A3E; }
   @media (max-width: 540px) {
-    .nbp-contact-row { grid-template-columns: 1fr 26px; gap: 4px; }
+    .nbp-contact-row { grid-template-columns: 1fr auto; gap: 4px; }
     .nbp-contact-row .nbp-contact-role { grid-column: 1 / -1; margin-top: 4px; }
     .nbp-contact-row input.nbp-input.contact-name { grid-column: 1 / 2; }
     .nbp-contact-row input.nbp-input.contact-email { grid-column: 1 / 2; }
@@ -603,6 +603,7 @@
           <button class="nbp-btn nbp-btn-email" id="btn-email-warm">✉ Warm follow-up</button>
           <button class="nbp-btn nbp-btn-email" id="btn-email-banner">✉ Free banner program</button>
           <button class="nbp-btn nbp-btn-email" id="btn-email-banner-warm">✉ Banner follow-up</button>
+          <button class="nbp-btn nbp-btn-email" id="btn-email-yearbook">✉ Yearbook + free banners</button>
         </div>
         <div class="nbp-status" id="status"></div>
       </div>
@@ -1114,19 +1115,29 @@
         '<div class="nbp-contact-role">' + (c.role || "") + '</div>' +
         '<input type="text" class="nbp-input contact-name" placeholder="Name" value="' + (c.name || "").replace(/"/g,"&quot;") + '">' +
         '<input type="email" class="nbp-input contact-email" placeholder="email@school.org" value="' + (c.email || "").replace(/"/g,"&quot;") + '">' +
-        '<button type="button" class="nbp-contact-use' + (idx === state.selectedContactIdx ? " is-default" : "") + '" title="Use as default recipient" data-idx="' + idx + '">' + (idx === state.selectedContactIdx ? "✓" : "○") + '</button>';
+        '<button type="button" class="nbp-contact-use' + (idx === state.selectedContactIdx ? " is-default" : "") + ((c.email && c.email.indexOf("@") > 0) ? "" : " no-email") + '" title="Send emails to this person" data-idx="' + idx + '">' + (idx === state.selectedContactIdx ? "✓ Sending to" : "Send to") + '</button>';
       var nameInput  = row.querySelector(".contact-name");
       var emailInput = row.querySelector(".contact-email");
       var useBtn     = row.querySelector(".nbp-contact-use");
       nameInput.addEventListener("input",  function(){ state.contacts[idx].name  = nameInput.value; });
       emailInput.addEventListener("input", function(){
         state.contacts[idx].email = emailInput.value;
-        useBtn.disabled = !(emailInput.value && emailInput.value.indexOf("@") > 0);
+        useBtn.classList.toggle("no-email", !(emailInput.value && emailInput.value.indexOf("@") > 0));
       });
-      useBtn.disabled = !(c.email && c.email.indexOf("@") > 0);
+      // Always selectable — if the row has no email yet, select it and drop the cursor
+      // into the email box so the next thing you do is type the address.
       useBtn.addEventListener("click", function(){
         state.selectedContactIdx = idx;
         renderContacts();
+        var hasEmail = state.contacts[idx].email && state.contacts[idx].email.indexOf("@") > 0;
+        if (!hasEmail) {
+          var rows = $("contacts-list").querySelectorAll(".nbp-contact-row");
+          var inp = rows[idx] && rows[idx].querySelector(".contact-email");
+          if (inp) inp.focus();
+          setStatus("Sending to " + (state.contacts[idx].role || "that contact") + " — add their email address.", "info");
+        } else {
+          setStatus("Emails will go to " + (state.contacts[idx].name || state.contacts[idx].role) + " (" + state.contacts[idx].email + ").", "info");
+        }
       });
       box.appendChild(row);
     });
@@ -2715,6 +2726,52 @@
         "If it's a fit, reply here or call/text and we'll get your first season on the calendar.\n\n" + sig;
     }
 
+    if (!(toAddr || "").trim()) setStatus("Heads up: the selected contact has no email yet — pick a contact with an address or add one above.", "info");
+    var mailto = "mailto:" + encodeURIComponent(toAddr) + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+    window.location.href = mailto;
+  }
+
+
+  // Top grade of the school, as a banner label: "senior" for high schools, otherwise
+  // the highest grade in the grade range ("8th-grade", "9th-grade", ...).
+  function topGradeBannerLabel(f) {
+    var isHS = (f.schoolType || "").toLowerCase().indexOf("high") > -1;
+    var nums = ((f.gradeRange || "").match(/\d+/g) || []).map(Number).filter(function(n){ return n >= 1 && n <= 12; });
+    var top = nums.length ? Math.max.apply(null, nums) : 0;
+    if (isHS || top >= 12) return { label: "senior", plural: "seniors", isHS: true };
+    if (!top) top = 8;
+    var suffix = (top === 1) ? "st" : (top === 2) ? "nd" : (top === 3) ? "rd" : "th";
+    return { label: top + suffix + "-grade", plural: top + suffix + " graders", isHS: false };
+  }
+
+  // Email: "book yearbook pictures with us and your top-grade banners are free all year"
+  function composeYearbookBannerEmail() {
+    var f = readForm();
+    if (!f.schoolName || !f.schoolShort) { setStatus("Complete the school info first.", "error"); return; }
+    var url = state.lastPublishedUrl && !/-(banner|ad)\.html$/i.test(state.lastPublishedUrl) ? state.lastPublishedUrl : (PAGES_BASE + "/" + slugName(f.schoolName) + ".html");
+    var short = f.schoolShort || f.schoolName;
+    var mascot = (f.mascot || "").trim();
+    var mascotPhrase = mascot ? "the " + mascot : short;
+    var g = topGradeBannerLabel(f);
+    var Grade = g.label.charAt(0).toUpperCase() + g.label.slice(1);
+
+    var contact = (state.contacts || [])[state.selectedContactIdx] || { name: "", email: "" };
+    var toAddr  = contact.email || "";
+    var firstName = (contact.name || "").trim().split(/\s+/)[0] || "";
+    var greeting = firstName ? "Hi " + firstName + "," : "Hi,";
+    var sig = "Talk soon,\nNathan Bingle\nNathan Bingle Photography\ncontact@nathanbinglephotography.com\n704-558-6566";
+
+    var subject = "Free " + g.label + " banners all year for " + mascotPhrase;
+    var body =
+      greeting + "\n\n" +
+      "Nathan Bingle here from Nathan Bingle Photography — a high-volume school and youth sports photography company based in Fort Mill, SC. We photograph a lot of the rec league teams your " + short + " families are on, so the work and the faces will look familiar.\n\n" +
+      "Here's the offer: book " + short + "'s yearbook pictures with us, and " + g.label + " athletic banners are free all year — fall, winter, and spring, every sport, every " + (g.isHS ? "senior" : g.label.replace("-grade", "") + " grader") + ". No cost to the school, no cost to the booster.\n\n" +
+      "Picture day runs the way it should: zero cost to the school, a revenue share back to " + short + ", online ordering so families never touch an envelope, a free retake day built in, and yearbook-ready files delivered to your yearbook staff on schedule.\n\n" +
+      "I put the full program for " + short + " on one page:\n\n" +
+      url + "\n\n" +
+      "If it's a fit, reply here or call/text and we'll get picture day and the " + g.label + " banners on the calendar.\n\n" + sig;
+
+    if (!(toAddr || "").trim()) setStatus("Heads up: the selected contact has no email yet — pick a contact with an address or add one above.", "info");
     var mailto = "mailto:" + encodeURIComponent(toAddr) + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
     window.location.href = mailto;
   }
@@ -2799,6 +2856,7 @@
         "704-558-6566";
     }
 
+    if (!(toAddr || "").trim()) setStatus("Heads up: the selected contact has no email yet — pick a contact with an address or add one above.", "info");
     var mailto = "mailto:" + encodeURIComponent(toAddr) + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
     window.location.href = mailto;
   }
@@ -2807,6 +2865,7 @@
   $("btn-email-warm").addEventListener("click", function() { composeEmail("warm"); });
   $("btn-email-banner").addEventListener("click", function() { composeBannerEmail("cold"); });
   $("btn-email-banner-warm").addEventListener("click", function() { composeBannerEmail("warm"); });
+  $("btn-email-yearbook").addEventListener("click", function() { composeYearbookBannerEmail(); });
 
   // Mode toggle (School / Sports)
   document.querySelectorAll(".nbp-mode-btn[data-modeswitch]").forEach(function(btn) {
